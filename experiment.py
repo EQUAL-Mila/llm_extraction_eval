@@ -54,4 +54,6 @@ if __name__=="__main__":
     # .... other arguments to be added
     args = parser.parse_args()
 
+    ## TODO: Wandb Setup
+
     single_eval_run(args)
