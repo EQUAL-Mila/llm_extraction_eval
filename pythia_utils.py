@@ -37,4 +37,24 @@ def load_pythia_model(modelsize, modelstep, device='cuda', padding_side='right',
 
 if __name__=="__main__":
     model, tokenizer = load_pythia_model('pythia-1.4b', 'step100000')
+    
+    
+    MODEL_NAMES = [ "pythia-14m",
+                    "pythia-70m",
+                    "pythia-160m",
+                    "pythia-410m",
+                    "pythia-1b",
+                    "pythia-1.4b",
+                    "pythia-2.8b",
+                    "pythia-6.9b",
+                    "pythia-12b",
+                    "pythia-70m-deduped",
+                    "pythia-160m-deduped",
+                    "pythia-410m-deduped",
+                    "pythia-1b-deduped",
+                    "pythia-1.4b-deduped",
+                    "pythia-2.8b-deduped",
+                    "pythia-6.9b-deduped",
+                    "pythia-12b-deduped"]
+
 
