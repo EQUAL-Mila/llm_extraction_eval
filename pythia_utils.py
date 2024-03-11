@@ -38,10 +38,10 @@ class VLLMModelWrapper:
     def set_base_prompt(self, prompt):
         self.prompt = prompt
 
-    def generate_text(self, prompt):
+    def generate_text(self, prompt="", prompt_token_ids=None):
         if prompt is None:
             prompt = self.prompt
-        return self.model.generate_text(prompt,self.sampling_params)
+        return self.model.generate(prompt,sampling_params = self.sampling_params,prompt_token_ids = prompt_token_ids)
 
 def cache_check_tokenizer(modelsize, modelstep,):
     '''
@@ -64,7 +64,7 @@ def load_pythia_model(modelsize, modelstep, device='cuda', padding_side='right',
     model = vllm.LLM(model = f"EleutherAI/{modelsize}", revision = modelstep ,tokenizer= path_to_scratch + "/%s/%s/" % (modelsize, modelstep), trust_remote_code = True)
 
     # testing model outputs
-    l = model.generate("Hello, eincorp!")
+    l = model.generate_text("Hello, eincorp!")
     print(l)
 
     return model, tokenizer
