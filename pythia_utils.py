@@ -33,12 +33,7 @@ class VLLMModelWrapper:
         self.sampling_params = vllm.SamplingParams(temperature=temperature, best_of=best_of, max_tokens=max_tokens,
                                                    use_beam_search=(best_of>1 and use_beam_search), seed=seed)
 
-    def set_base_prompt(self, prompt):
-        self.prompt = prompt
-
     def generate_text(self, prompt=None, prompt_token_ids=None):
-        if prompt is None:
-            prompt = self.prompt
         return self.model.generate(prompts=prompt, sampling_params=self.sampling_params, prompt_token_ids=prompt_token_ids)
 
 def cache_check_tokenizer(modelsize, modelstep,):

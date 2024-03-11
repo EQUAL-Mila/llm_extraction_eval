@@ -5,7 +5,7 @@ import pickle
 from tqdm import tqdm
 import torch
 
-from llm_extraction_eval.pythia_utils_archive import load_pythia_model, VLLMModelWrapper
+from pythia_utils import load_pythia_model, VLLMModelWrapper
 from prompt_loader import ExtractionPromptDataset
 from utils import get_filename, prompt_scoring
 
@@ -35,7 +35,8 @@ def single_eval_run(args):
         print(prompt)
         print(completion)
         print(model)
-        outgen = model.generate_text(prompt[0])
+        print(model.sampling_params)
+        outgen = model.generate_text(prompt_token_ids=prompt)
         print(outgen)
         exit()
         ## TODO: Where exactly do we add generation hyperparameters? Here or when defining the model?
