@@ -73,11 +73,15 @@ def load_pythia_model(modelsize, modelstep, device='cuda', padding_side='right',
 if __name__ == "__main__":
 
     MODEL_NAMES = [
-        "pythia-14m", "pythia-70m", "pythia-160m", "pythia-410m", "pythia-1b",
-        "pythia-1.4b", "pythia-2.8b", "pythia-6.9b", "pythia-12b",
-        "pythia-70m-deduped", "pythia-160m-deduped", "pythia-410m-deduped",
-        "pythia-1b-deduped", "pythia-1.4b-deduped", "pythia-2.8b-deduped",
-        "pythia-6.9b-deduped", "pythia-12b-deduped"
+        "pythia-14m",
+        "pythia-70m",
+        "pythia-160m",
+        "pythia-410m",
+        "pythia-1b",
+        "pythia-1.4b",
+        "pythia-2.8b",
+        "pythia-6.9b",
+        "pythia-12b",
     ]
 
     DEFUALT_MODEL, DEFAULT_REVISION = "pythia-1.4b", 'step100000'
@@ -90,4 +94,5 @@ if __name__ == "__main__":
                              use_beam_search=False,
                              max_tokens=200)
 
-    model.generate_text(prompt = "Hello, eincorp!")
+    prompt = "The quick brown fox jumps over the lazy dog."
+    model.generate_text(prompt=prompt)
