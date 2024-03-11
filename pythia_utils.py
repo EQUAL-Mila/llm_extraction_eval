@@ -7,11 +7,8 @@ load_dotenv()
 
 path_to_scratch = os.environ.get("SCRATCH")
 
-
-from vllm import SamplingParams
-
 class VLLMModelWrapper:
-    def __init__(self, model, temperature=0, use_beam_search=False,seed=None, max_tokens=200, **kwargs):
+    def __init__(self, model, temperature=0, best_of=1, use_beam_search=False, seed=0, max_tokens=200, **kwargs):
         '''
         best_of: Number of output sequences that are generated from the prompt.
             From these `best_of` sequences, the top `n` sequences are returned.
@@ -33,15 +30,16 @@ class VLLMModelWrapper:
         '''
 
         self.model = model
-        self.sampling_params = SamplingParams(temperature=temperature,max_tokens=max_tokens,use_beam_search=use_beam_search)
+        self.sampling_params = vllm.SamplingParams(temperature=temperature, best_of=best_of, max_tokens=max_tokens,
+                                                   use_beam_search=(best_of>1 and use_beam_search), seed=seed)
 
     def set_base_prompt(self, prompt):
         self.prompt = prompt
 
-    def generate_text(self, prompt="", prompt_token_ids=None):
+    def generate_text(self, prompt=None, prompt_token_ids=None):
         if prompt is None:
             prompt = self.prompt
-        return self.model.generate(prompt,sampling_params = self.sampling_params,prompt_token_ids = prompt_token_ids)
+        return self.model.generate(prompts=prompt, sampling_params=self.sampling_params, prompt_token_ids=prompt_token_ids)
 
 def cache_check_tokenizer(modelsize, modelstep,):
     '''
@@ -52,23 +50,19 @@ def cache_check_tokenizer(modelsize, modelstep,):
 
 def load_pythia_model(modelsize, modelstep, device='cuda', padding_side='right', truncation_side='right', model_max_length=2048):
 
-    # check if the tokenizer is already cached/saved
+    modelloc = path_to_scratch + "/%s/%s/" % (modelsize, modelstep)
     if not cache_check_tokenizer(modelsize, modelstep):
         tokenizer = AutoTokenizer.from_pretrained(
             "EleutherAI/%s" % modelsize,
             revision=modelstep,
             padding_side=padding_side, truncation_side=truncation_side, model_max_length=model_max_length
         )
-        tokenizer.save_pretrained(path_to_scratch + "/%s/%s/" % (modelsize, modelstep))
+        tokenizer.save_pretrained(modelloc)
 
-    model = vllm.LLM(model = f"EleutherAI/{modelsize}", revision = modelstep ,tokenizer= path_to_scratch + "/%s/%s/" % (modelsize, modelstep), trust_remote_code = True)
+    model = vllm.LLM(model = f"EleutherAI/{modelsize}", revision = modelstep,
+                     tokenizer= modelloc, download_dir= modelloc, trust_remote_code = True)
 
-    # testing model outputs
-    l = model.generate_text("Hello, eincorp!")
-    print(l)
-
-    return model, tokenizer
-
+    return model
 
 if __name__ == "__main__":
 
@@ -84,9 +78,9 @@ if __name__ == "__main__":
         "pythia-12b",
     ]
 
-    DEFUALT_MODEL, DEFAULT_REVISION = "pythia-1.4b", 'step100000'
+    DEFAULT_MODEL, DEFAULT_REVISION = "pythia-1.4b", 'step100000'
 
-    model, tokenizer = load_pythia_model(DEFUALT_MODEL, DEFAULT_REVISION)
+    model, tokenizer = load_pythia_model(DEFAULT_MODEL, DEFAULT_REVISION)
 
     # configure the parameters for the generation (model, temperature, etc)
     model = VLLMModelWrapper(model=model,

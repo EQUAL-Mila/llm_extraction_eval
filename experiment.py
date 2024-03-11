@@ -5,7 +5,7 @@ import pickle
 from tqdm import tqdm
 import torch
 
-from pythia_utils import load_pythia_model
+from llm_extraction_eval.pythia_utils_archive import load_pythia_model, VLLMModelWrapper
 from prompt_loader import ExtractionPromptDataset
 from utils import get_filename, prompt_scoring
 
@@ -16,21 +16,30 @@ path_to_scratch = os.environ.get("SCRATCH")
 def single_eval_run(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model, tokenizer = load_pythia_model(args.modelsize, args.modelstep, device=device)
+    model = load_pythia_model(args.modelsize, args.modelstep, device=device)
+    model = VLLMModelWrapper(model=model, temperature=args.temperature, best_of=args.beamwidth, 
+                             use_beam_search=not args.sampling, max_tokens=args.maxtokens)
     
-    if 'deduped' in args.modelsize: promptfile = path_to_scratch + "/pile-pythia/pile-deduped/document"
-    else: promptfile = path_to_scratch + "/pile-pythia/pile-standard/document"
+    if 'deduped' in args.modelsize: pilepath = path_to_scratch + "/pile-pythia/pile-deduped/document"
+    else: pilepath = path_to_scratch + "/pile-pythia/pile-standard/document"
 
-    prompt_dataset = ExtractionPromptDataset(pile_path=promptfile, evalfile=args.evalfile,
+    prompt_dataset = ExtractionPromptDataset(pilepath=pilepath, evalfile=args.evalfile,
                                              promptlen=args.promptlen, complen=args.complen, promptloc=args.promptloc,
                                              prompttype=args.prompttype, instructions=args.instructions)
-    prompt_loader = torch.utils.data.DataLoader(prompt_dataset, batch_size=args.batch_size, shuffle=False)
+    prompt_loader = torch.utils.data.DataLoader(prompt_dataset, batch_size=args.batchsize, shuffle=False)
 
     score_arr = []
     for sample in tqdm(prompt_loader):
-        prompt, completion = sample['prompt'].to(device), sample['completion'].to(device)
+        prompt, completion = sample['prompt'].detach().cpu().numpy(), sample['completion'].detach().cpu().numpy()
 
+        print(prompt)
+        print(completion)
+        print(model)
+        outgen = model.generate_text(prompt[0])
+        print(outgen)
+        exit()
         ## TODO: Where exactly do we add generation hyperparameters? Here or when defining the model?
+        # model.generate_text(prompt=prompt)
         outgen = model.generate(prompt, max_new_tokens=50)
         outgen_completion = outgen[:, prompt.shape[1]:]
 
