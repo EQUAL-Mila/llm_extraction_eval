@@ -1,3 +1,5 @@
+import torch
+
 def get_filename(args, args_subset=None):
     args_dict = vars(args)
     filename = ''
@@ -7,3 +9,11 @@ def get_filename(args, args_subset=None):
         filename += ele + '-' + str(args_dict[ele]) + '__'
     
     return filename[:-2]
+
+def prompt_scoring(orig_texts, gen_texts, scoring='exact'):
+    ## TODO: It records the perfect match for now, but we want to record how much matches later.
+    if scoring=='exact':
+        outscores = torch.all(orig_texts==gen_texts, dim=-1)
+        return outscores.detach().cpu().numpy()
+    else:
+        raise NotImplementedError("Evaluation scoring method %s is not implemented" % scoring)

@@ -4,7 +4,8 @@ import torch
 from mmap_dataset import MMapIndexedDataset
 
 class ExtractionPromptDataset(torch.utils.data.Dataset):
-    def __init__(self, pile_path):
+    def __init__(self, pile_path, evalfile, promptlen, complen, promptloc, prompttype, instructions):
+        ### TODO: Incorporate all the inputs
         self.mmap_dataset = MMapIndexedDataset(pile_path, skip_warmup = True)
 
     def __len__(self):

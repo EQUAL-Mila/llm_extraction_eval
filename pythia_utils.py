@@ -38,7 +38,6 @@ def load_pythia_model(modelsize, modelstep, device='cuda', padding_side='right',
 if __name__=="__main__":
     model, tokenizer = load_pythia_model('pythia-1.4b', 'step100000')
     
-    
     MODEL_NAMES = [ "pythia-14m",
                     "pythia-70m",
                     "pythia-160m",
