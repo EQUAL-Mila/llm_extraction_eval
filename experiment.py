@@ -48,12 +48,31 @@ def single_eval_run(args):
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description='Extraction Attack: Single Evaluation Run')
+    ### Arguments to control Prompt Creation for Evaluation
+    parser.add_argument('--promptlen', default=10, type=int, help='Length of Prompt')
+    parser.add_argument('--complen', default=50, type=int, help='Length of Completion')
+    parser.add_argument('--promptloc', default=None, type=str, help='Filename containing locations of Prompt in each Sentence')
+    parser.add_argument('--prompttype', default='standard', type=str, help='Prompt Formatting Before Feeding it to the Model')
+    parser.add_argument('--instructions', default='None', type=str, help='Any Additional Instructions Added Before the Prompt')
+
+    ### LLM Hyperparameters for Generation
+    parser.add_argument('--temperature', default=0., type=float, help='Temperature for LLM Generation')
+    parser.add_argument('--beamwidth', default=1, type=int, help='Beam Search Width for LLM Generation')
+    parser.add_argument('--maxtokens', default=50, type=int, help='Max tokens for LLM Generation')
+    parser.add_argument('--sampling', action='store_true', help='Do sampling for LLM Generation')
+
+    ### Model Configuration
     parser.add_argument('--modelsize', default='pythia-1.4b', type=str, help='Model Size')
     parser.add_argument('--modelstep', default='step100000', type=str, help='Training Step for Checkpoint')
-    parser.add_argument('--batch_size', default=1, type=int, help='Evaluation Batch Size')
-    # .... other arguments to be added
-    args = parser.parse_args()
 
+    ### Scoring Method for Evaluation
+    parser.add_argument('--scoring', default='exact', type=str, help='Scoring Method for Evaluation')
+
+    ### Other Arguments
+    parser.add_argument('--batchsize', default=1, type=int, help='Evaluation Batch Size')
+    parser.add_argument('--evalfile', type=str, help='Text File with Indices of Input Sentences to Evaluate')
+
+    args = parser.parse_args()
     ## TODO: Wandb Setup
 
     single_eval_run(args)
