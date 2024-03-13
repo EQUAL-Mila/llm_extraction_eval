@@ -31,7 +31,7 @@ class VLLMModelWrapper:
 
         self.model = model
         self.sampling_params = vllm.SamplingParams(temperature=temperature, best_of=best_of, max_tokens=max_tokens,
-                                                   use_beam_search=(best_of>1 and use_beam_search), seed=seed)
+                                                   use_beam_search=(best_of>1 and use_beam_search))
 
     def generate_text(self, prompt=None, prompt_token_ids=None):
         return self.model.generate(prompts=prompt, sampling_params=self.sampling_params, prompt_token_ids=prompt_token_ids)
