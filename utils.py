@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 
 def get_filename(args, args_subset=None):
@@ -10,10 +11,11 @@ def get_filename(args, args_subset=None):
     
     return filename[:-2]
 
-def prompt_scoring(orig_texts, gen_texts, scoring='exact'):
+def prompt_scoring(orig_ids, gen_ids, scoring='exact'):
+    orig_ids, gen_ids = np.array(orig_ids), np.array(gen_ids)
     ## TODO: It records the perfect match for now, but we want to record how much matches later.
     if scoring=='exact':
-        outscores = torch.all(orig_texts==gen_texts, dim=-1)
-        return outscores.detach().cpu().numpy()
+        outscores = np.all(orig_ids==gen_ids, axis=-1)
+        return outscores
     else:
         raise NotImplementedError("Evaluation scoring method %s is not implemented" % scoring)

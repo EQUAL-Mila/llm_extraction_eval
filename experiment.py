@@ -30,22 +30,14 @@ def single_eval_run(args):
 
     score_arr = []
     for sample in tqdm(prompt_loader):
-        prompt, completion = sample['prompt'].detach().cpu().numpy(), sample['completion'].detach().cpu().numpy()
+        prompt_ids, completion_ids = sample['prompt'].detach().cpu().tolist(), sample['completion'].detach().cpu().tolist()
 
-        print(prompt)
-        print(completion)
-        print(model)
-        print(model.sampling_params)
-        outgen = model.generate_text(prompt_token_ids=prompt)
-        print(outgen)
-        exit()
-        ## TODO: Where exactly do we add generation hyperparameters? Here or when defining the model?
-        # model.generate_text(prompt=prompt)
-        outgen = model.generate(prompt, max_new_tokens=50)
-        outgen_completion = outgen[:, prompt.shape[1]:]
+        outgen = model.generate_text(prompt_token_ids=prompt_ids)
+        outgen_ids = [ele.outputs[0].token_ids for ele in outgen]
 
-        match_score = prompt_scoring(completion, outgen_completion, scoring=args.scoring)
+        match_score = prompt_scoring(completion_ids, outgen_ids, scoring=args.scoring)
         score_arr.extend(match_score)
+        print(np.sum(score_arr))
 
     ## TODO: We might want to further divide the results or name them differently or save something else instead of score_arr
     with open('results/' + get_filename(args), "wb") as fp:
