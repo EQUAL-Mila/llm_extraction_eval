@@ -39,7 +39,6 @@ def single_eval_run(args):
         score_arr.extend(match_score)
         print(np.sum(score_arr), np.mean(score_arr))
 
-    ## TODO: We might want to further divide the results or name them differently or save something else instead of score_arr
     with open('results/' + get_filename(args, args_ignore=['batchsize']), "wb") as fp:
         pickle.dump(score_arr, fp)
 
