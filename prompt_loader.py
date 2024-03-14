@@ -1,44 +1,38 @@
 import numpy as np
+import pandas as pd
 import torch
 
 from mmap_dataset import MMapIndexedDataset
 
 class ExtractionPromptDataset(torch.utils.data.Dataset):
-    def __init__(self, pilepath, evalfile, promptlen, complen, promptloc, prompttype, instructions):
-        ### TODO: Incorporate all the inputs
+    def __init__(self, pilepath, evalfile, promptlen, complen, prompttype, instructions):
         self.mmap_dataset = MMapIndexedDataset(pilepath, skip_warmup = True)
+        self.promptlen = promptlen
+        self.complen = complen
+        self.prompttype = prompttype
+        self.instructions = instructions
+
+        evaldf = pd.read_csv(evalfile)
+        self.evalindices = evaldf['index']
+        self.evalloc = evaldf['loc']
 
     def __len__(self):
-        return len(self.mmap_dataset)
-
-    def set_window_length(self,prefix_len=None,suffix_len=None, sentence=""):
-        """
-        vary prefix/suffix window length
-        """
-
-        if prefix_len is None and suffix_len is None:
-            prefix = sentence[:50]
-            suffix = sentence[50:100]
-        
-        prefix = sentence[:prefix_len]
-        suffix = sentence[ prefix_len: prefix_len + suffix_len ]
-        return prefix, suffix
-
-    def set_additional_instructions(self, sentence="", instruction=""):
-        """
-        add additional instructions to the prompt
-        """
-        return instruction + sentence
+        return len(self.evalindices)
     
-    def __getitem__(self, idx):
+    def __getitem__(self, raw_idx):
+        idx, loc = int(self.evalindices[raw_idx]), int(self.evalloc[raw_idx])
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
         sentence = self.mmap_dataset[idx]
+        
+        ### TODO: All Different Variations of Prompt Creation go here!! 
+        ### We can also create separate functions for them for readability.
+        if self.prompttype=='standard':
+            prompt = np.array(sentence[loc:loc+self.promptlen], dtype=np.int32)
+            completion = np.array(sentence[loc+self.promptlen:loc+self.promptlen+self.complen], dtype=np.int32)
 
-        ## Divide it into prompt and completion.
-        ## TODO: All Different Variations of Prompt Creation Go Here!!
-
-        prompt, completion = np.array(sentence[:50], dtype=np.int32), np.array(sentence[50:100], dtype=np.int32)
+        if self.instructions is not None:
+            prompt = np.concatenate([np.array(self.instructions, dtype=np.int32), prompt])
 
         return {'prompt': torch.from_numpy(prompt), 'completion': torch.from_numpy(completion)}
