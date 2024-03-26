@@ -29,8 +29,8 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
         ### TODO: All Different Variations of Prompt Creation go here!! 
         ### We can also create separate functions for them for readability.
         if self.prompttype=='standard':
-            prompt = np.array(sentence[loc:loc+self.promptlen], dtype=np.int32)
-            completion = np.array(sentence[loc+self.promptlen:loc+self.promptlen+self.complen], dtype=np.int32)
+            prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
+            completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
 
         if self.instructions is not None:
             prompt = np.concatenate([np.array(self.instructions, dtype=np.int32), prompt])

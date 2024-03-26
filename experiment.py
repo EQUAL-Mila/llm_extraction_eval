@@ -46,7 +46,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(description='Extraction Attack: Single Evaluation Run')
     ### Arguments to control Prompt Creation for Evaluation
     parser.add_argument('--evalfile', required=True, type=str, help='File with Indices and Location of Sentences to Evaluate')
-    parser.add_argument('--promptlen', default=10, type=int, help='Length of Prompt')
+    parser.add_argument('--promptlen', default=50, type=int, help='Length of Prompt')
     parser.add_argument('--complen', default=50, type=int, help='Length of Completion')
     parser.add_argument('--prompttype', default='standard', type=str, help='Prompt Formatting Before Feeding it to the Model')
     parser.add_argument('--instructions', default=None, type=str, help='Any Additional Instructions Added Before the Prompt')

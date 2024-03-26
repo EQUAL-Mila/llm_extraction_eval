@@ -14,7 +14,7 @@ selected_indices = random.sample(range(MIN_INDEX, MAX_INDEX), NUM_SENTENCES)
 selected_indices.sort()
 
 df = pd.DataFrame({'index': selected_indices})
-### Always pick the prompt from the start of the sentence (loc=0). We can make changes to this later.
-df['loc'] = 0
+### loc is the point between the prompt p and the completion x.
+df['loc'] = 1000
 
 df.to_csv(FILENAME, index=False)
