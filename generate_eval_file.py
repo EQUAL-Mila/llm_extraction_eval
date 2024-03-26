@@ -15,6 +15,6 @@ selected_indices.sort()
 
 df = pd.DataFrame({'index': selected_indices})
 ### loc is the point between the prompt p and the completion x.
-df['loc'] = 500
+df['loc'] = 1000
 
 df.to_csv(FILENAME, index=False)

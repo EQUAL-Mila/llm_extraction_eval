@@ -31,6 +31,16 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
         if self.prompttype=='standard':
             prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
             completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
+        elif self.prompttype=='skipalt':
+            prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
+            if len(prompt)%2==0: prompt = prompt[1::2]
+            else: prompt = prompt[::2]
+            completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
+        # elif self.prompttype=='end50':
+        #     prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
+        #     if len(prompt)%2==0: prompt = prompt[1::2]
+        #     else: prompt = prompt[::2]
+        #     completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
 
         if self.instructions is not None:
             prompt = np.concatenate([np.array(self.instructions, dtype=np.int32), prompt])
