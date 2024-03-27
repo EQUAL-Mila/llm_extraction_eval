@@ -28,19 +28,17 @@ def single_eval_run(args):
                                              prompttype=args.prompttype, instructions=get_instruction_ids(args.instructions))
     prompt_loader = torch.utils.data.DataLoader(prompt_dataset, batch_size=args.batchsize, shuffle=False)
 
-    score_arr = []
+    gen_arr = []
     for sample in tqdm(prompt_loader):
         prompt_ids, completion_ids = sample['prompt'].detach().cpu().tolist(), sample['completion'].detach().cpu().tolist()
 
         outgen = model.generate_text(prompt_token_ids=prompt_ids)
         outgen_ids = [ele.outputs[0].token_ids for ele in outgen]
 
-        match_score = prompt_scoring(completion_ids, outgen_ids, scoring=args.scoring)
-        score_arr.extend(match_score)
-        print(np.sum(score_arr), np.mean(score_arr))
+        gen_arr.append({'prompt_ids': prompt_ids, 'completion_ids': completion_ids, 'outgen_ids': outgen_ids})
 
-    with open('results/' + get_filename(args, args_ignore=['batchsize']), "wb") as fp:
-        pickle.dump(score_arr, fp)
+    with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['batchsize']), "wb") as fp:
+        pickle.dump(gen_arr, fp)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description='Extraction Attack: Single Evaluation Run')
