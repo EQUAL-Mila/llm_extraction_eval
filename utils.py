@@ -1,5 +1,32 @@
+import argparse
 import numpy as np
 import torch
+
+def setup_parser():
+    parser = argparse.ArgumentParser(description='Extraction Attack: Single Evaluation Run')
+    ### Arguments to control Prompt Creation for Evaluation
+    parser.add_argument('--evalfile', required=True, type=str, help='File with Indices and Location of Sentences to Evaluate')
+    parser.add_argument('--promptlen', default=50, type=int, help='Length of Prompt')
+    parser.add_argument('--complen', default=50, type=int, help='Length of Completion')
+    parser.add_argument('--prompttype', default='standard', type=str, help='Prompt Formatting Before Feeding it to the Model')
+    parser.add_argument('--instructions', default=None, type=str, help='Any Additional Instructions Added Before the Prompt')
+
+    ### LLM Hyperparameters for Generation
+    parser.add_argument('--temperature', default=0., type=float, help='Temperature for LLM Generation')
+    parser.add_argument('--beamwidth', default=1, type=int, help='Beam Search Width for LLM Generation')
+    parser.add_argument('--maxtokens', default=50, type=int, help='Max tokens for LLM Generation')
+    parser.add_argument('--sampling', action='store_true', help='Do sampling for LLM Generation')
+
+    ### Model Configuration
+    parser.add_argument('--modelsize', default='pythia-1.4b', type=str, help='Model Size')
+    parser.add_argument('--modelstep', default='step100000', type=str, help='Training Step for Checkpoint')
+
+    ### Scoring Method for Evaluation
+    parser.add_argument('--scoring', default='exact', type=str, help='Scoring Method for Evaluation')
+
+    ### Other Arguments
+    parser.add_argument('--batchsize', default=1, type=int, help='Evaluation Batch Size')
+    return parser
 
 def get_filename(args, args_ignore=None):
     args_dict = vars(args)

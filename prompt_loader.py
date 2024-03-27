@@ -15,6 +15,7 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
         evaldf = pd.read_csv(evalfile)
         self.evalindices = evaldf['index']
         self.evalloc = evaldf['loc']
+        self.rng = np.random.default_rng(42)
 
     def __len__(self):
         return len(self.evalindices)
@@ -36,11 +37,23 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
             if len(prompt)%2==0: prompt = prompt[1::2]
             else: prompt = prompt[::2]
             completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
-        # elif self.prompttype=='end50':
-        #     prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
-        #     if len(prompt)%2==0: prompt = prompt[1::2]
-        #     else: prompt = prompt[::2]
-        #     completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
+        elif self.prompttype=='end50':
+            prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
+            promptsuff, promptpref = prompt[:-50], prompt[-50:]
+            self.rng.shuffle(promptsuff)
+            prompt = np.concatenate((promptsuff, promptpref))
+            completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
+        elif self.prompttype=='corner50':
+            prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
+            promptsuff, promptmid, promptpref = prompt[:50], prompt[50:-50], prompt[-50:]
+            self.rng.shuffle(promptmid)
+            prompt = np.concatenate((promptsuff, promptmid, promptpref))
+            completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
+        elif self.prompttype=='corner50del':
+            prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
+            promptsuff, promptmid, promptpref = prompt[:50], prompt[50:-50], prompt[-50:]
+            prompt = np.concatenate((promptsuff, promptpref))
+            completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
 
         if self.instructions is not None:
             prompt = np.concatenate([np.array(self.instructions, dtype=np.int32), prompt])
