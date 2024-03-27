@@ -36,7 +36,7 @@ def single_eval_run(args):
 
         gen_arr.append({'prompt_ids': prompt_ids, 'completion_ids': completion_ids, 'outgen_ids': outgen_ids})
 
-    with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['batchsize']), "wb") as fp:
+    with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize']), "wb") as fp:
         pickle.dump(gen_arr, fp)
 
 if __name__=="__main__":

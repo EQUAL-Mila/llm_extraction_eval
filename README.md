@@ -12,7 +12,7 @@
 
 - [ ] Perform extraction attacks over different time steps. (Code note: Simple change the flag `modelstep` to `stepxxxxxx`, where `xxxxxx` can be anything between 100000 to 140000, at steps of 1000 only)
 
-- [ ] Changing scoring from perfect match at a fixed length to the length of perfect match. Observe the distribution. (Code note: TODO. This is not implemented yet)
+- [ ] Changing scoring from perfect match at a fixed length to the length of perfect match. Observe the distribution. (Code note: Use the `scoring` flag `length` to check the length of exact prefix match)
 - [ ] Incorporate levenshtein distance or other measures to study insertions, deletions or substitutions. (Code note: TODO. This is not implemented yet)
 - [ ] Study semantic similarity instead of token level matching, by using cosine similarity. (Code note: TODO. This is not implemented yet)
 

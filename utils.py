@@ -46,10 +46,9 @@ def prompt_scoring(orig_ids, gen_ids, scoring='exact'):
         return outscores
     elif scoring=='length':
         outbools = orig_ids!=gen_ids
-        print(outbools)
-        outscores = np.argmax(outbools, axis=-1)
-        print(outscores)
-        exit()
+        outboolspad = np.concatenate((outbools, np.ones((outbools.shape[0], 1))), axis=-1)
+        outlengths = np.argmax(outboolspad, axis=-1)
+        return outlengths
     else:
         raise NotImplementedError("Evaluation scoring method %s is not implemented" % scoring)
     
