@@ -15,8 +15,8 @@ def single_eval_score(args):
         scores = prompt_scoring(batch['completion_ids'], batch['outgen_ids'], args.scoring)
         score_arr.extend(scores)
     
-    # score_arr = np.array(score_arr)
-    # print(np.mean(score_arr>=10))
+    score_arr = np.array(score_arr)
+    print(np.mean(score_arr>=40))
     # print(np.mean(score_arr))
 
 if __name__=="__main__":
