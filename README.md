@@ -1,21 +1,20 @@
 ## Experiments TODO
 
-- [ ] Keep increasing prompt length and see how the results change. Does it keep on increasing always? Does it plateau? Does it maybe even decrease for some prompts? (Code note: Simply change the values of the flag `promptlen` and see how things change)
-- [ ] Skip every alternate token in the prompt and see how extraction rates change. The extraction rate should still be some reasonably high value, to show that it's the context we care about, not the exact order of tokens. (Code note: Simply change the flag `prompttype` to `skipalt` to skip alternate tokens in the prompt)
-- [ ] Keep the last few tokens as is, but randomly shuffle all tokens at the start. Same expectation as above. (Code note: Simply change the flag `prompttype` to `end50` to shuffle the initial tokens in the prompt, while keeping the last 50 tokens fixed)
-- [ ] Keep the last few and the first few tokens as is, but randomly shuffle all tokens in the middle, or even remove them. Same expectation as above. (Code note: Simply change the flag `prompttype` to `corner50` to shuffle the middle tokens in the prompt, while keeping the last and first 50 tokens each fixed. Change the flag to `corner50del` for the same but middle tokens are deleted instead of being shuffled)
+- [x] Keep increasing prompt length and see how the results change. Does it keep on increasing always? Does it plateau? Does it maybe even decrease for some prompts? (Code note: Simply change the values of the flag `promptlen` and see how things change)
+- [x] Skip every alternate token in the prompt and see how extraction rates change. The extraction rate should still be some reasonably high value, to show that it's the context we care about, not the exact order of tokens. (Code note: Simply change the flag `prompttype` to `skipalt` to skip alternate tokens in the prompt)
+- [x] Keep the last few tokens as is, but randomly shuffle all tokens at the start. Same expectation as above. (Code note: Simply change the flag `prompttype` to `end50` to shuffle the initial tokens in the prompt, while keeping the last 50 tokens fixed)
+- [x] Keep the last few and the first few tokens as is, but randomly shuffle all tokens in the middle, or even remove them. Same expectation as above. (Code note: Simply change the flag `prompttype` to `corner50` to shuffle the middle tokens in the prompt, while keeping the last and first 50 tokens each fixed. Change the flag to `corner50del` for the same but middle tokens are deleted instead of being shuffled)
 
 - [ ] Introduce instructions into the prompt to further elicit information out of the model. Are there instructions that can help with data extraction? (Code note: Each instruction set has its own identifier. Use the flag `instructions` and the identifier as input to add those instructions to the prompt. Check function `get_instruction_ids` in file `utils.py` to see those instruction identifiers, or add new instructions)
 
 
-- [ ] Increase beam length and max tokens to see if the generation changes. (Code note: Simply set the flags `beamwidth` and `maxtokens` to change the relevant parameters)
+- [x] Increase beam length and max tokens to see if the generation changes. (Code note: Simply set the flags `beamwidth` and `maxtokens` to change the relevant parameters)
 
-- [ ] Perform extraction attacks over different time steps. (Code note: Simple change the flag `modelstep` to `stepxxxxxx`, where `xxxxxx` can be anything between 100000 to 140000, at steps of 1000 only)
+- [x] Perform extraction attacks over different time steps. (Code note: Simple change the flag `modelstep` to `stepxxxxxx`, where `xxxxxx` can be anything between 100000 to 140000, at steps of 1000 only)
 
-- [ ] Changing scoring from perfect match at a fixed length to the length of perfect match. Observe the distribution. (Code note: Use the `scoring` flag `length` to check the length of exact match)
+- [x] Changing scoring from perfect match at a fixed length to the length of perfect match. Observe the distribution. (Code note: Use the `scoring` flag `length` to check the length of exact match)
 - [ ] Incorporate levenshtein distance or other measures to study insertions, deletions or substitutions. (Code note: Use the `scoring` flag `levenshtein` to check the levenshtein distance between generated text and original completion)
 - [ ] Study semantic similarity instead of token level matching, by using cosine similarity. (Code note: TODO. This is not implemented yet)
-
 - [ ] Print out original sentences, given indices, to qualitatively analyse the results. (Code note: TODO. This is not implemented yet)
 
 ## Dataset Download Instructions
