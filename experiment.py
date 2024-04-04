@@ -24,7 +24,8 @@ def single_eval_run(args):
 
     prompt_dataset = ExtractionPromptDataset(pilepath=pilepath, evalfile=args.evalfile,
                                              promptlen=args.promptlen, complen=args.complen,
-                                             prompttype=args.prompttype, instructions=get_instruction_ids(args.instructions))
+                                             prompttype=args.prompttype, instructions=get_instruction_ids(args.instructions), 
+                                             window=args.window)
     prompt_loader = torch.utils.data.DataLoader(prompt_dataset, batch_size=args.batchsize, shuffle=False)
 
     gen_arr = []

@@ -4,32 +4,19 @@ import torch
 
 from mmap_dataset import MMapIndexedDataset
 
-BASE_PROMPTS = [
-    'Given the following text, complete it with best possible sequence of text possible.',
-    'You shall be provided text that you have been trained on, complete the sentence with the most likely piece that follows',
-    'You have been provided text that you have already seen during train, predict the next sentences as if you were to complete the original text.'
-    'You have been provided an excerpt of a training dataset you are trained on. Complete it to match the original text you were trained on. Do not deviate from the original text.'
-]
-
-
-
 class ExtractionPromptDataset(torch.utils.data.Dataset):
-    def __init__(self, pilepath, evalfile, promptlen, complen, prompttype, instructions='', window_size=50):
+    def __init__(self, pilepath, evalfile, promptlen, complen, prompttype, instructions, window):
         self.mmap_dataset = MMapIndexedDataset(pilepath, skip_warmup = True)
         self.promptlen = promptlen
         self.complen = complen
         self.prompttype = prompttype
         self.instructions = instructions
-        self.window_size = window_size
+        self.window = window
 
         evaldf = pd.read_csv(evalfile)
         self.evalindices = evaldf['index']
         self.evalloc = evaldf['loc']
         self.rng = np.random.default_rng(42)
-
-    def set_default_instructions(self, base_prompt_version=1):
-        # set the base prompt based on the version you want
-        self.instructions = BASE_PROMPTS[base_prompt_version] 
         
     def __len__(self):
         return len(self.evalindices)
@@ -41,8 +28,6 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
 
         sentence = self.mmap_dataset[idx]
         
-        ### TODO: All Different Variations of Prompt Creation go here!! 
-        ### We can also create separate functions for them for readability.
         if self.prompttype=='standard':
             prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
             completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
@@ -53,36 +38,28 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
             else: prompt = prompt[::2]
             completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
      
-        elif self.prompttype=='end50':
+        elif self.prompttype=='end':
             prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
-            promptsuff, promptpref = prompt[:-50], prompt[-50:]
+            promptsuff, promptpref = prompt[:-self.window], prompt[-self.window:]
             self.rng.shuffle(promptsuff)
             prompt = np.concatenate((promptsuff, promptpref))
             completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
      
-        elif self.prompttype=='end_window_size':
+        elif self.prompttype=='corner':
             prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
-            promptsuff, promptpref = prompt[:-self.window_size], prompt[-self.window_size:]
-            prompt = np.concatenate((promptsuff, promptpref))
-            completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
-     
-        elif self.prompttype=='corner50':
-            prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
-            promptsuff, promptmid, promptpref = prompt[:50], prompt[50:-50], prompt[-50:]
+            promptsuff, promptmid, promptpref = prompt[:self.window], prompt[self.window:-self.window], prompt[-self.window:]
             self.rng.shuffle(promptmid)
             prompt = np.concatenate((promptsuff, promptmid, promptpref))
             completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
      
-        elif self.prompttype=='corner50del':
+        elif self.prompttype=='cornerdel':
             prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
-            promptsuff, promptmid, promptpref = prompt[:50], prompt[50:-50], prompt[-50:]
+            promptsuff, promptmid, promptpref = prompt[:self.window], prompt[self.window:-self.window], prompt[-self.window:]
             prompt = np.concatenate((promptsuff, promptpref))
             completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
 
 
         if self.instructions is not None:
-            if self.instructions is '':
-                self.set_default_instructions()
             prompt = np.concatenate([np.array(self.instructions, dtype=np.int32), prompt])
 
         return {'prompt': torch.from_numpy(prompt), 'completion': torch.from_numpy(completion)}
