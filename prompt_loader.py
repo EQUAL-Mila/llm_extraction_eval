@@ -14,7 +14,7 @@ BASE_PROMPTS = [
 
 
 class ExtractionPromptDataset(torch.utils.data.Dataset):
-    def __init__(self, pilepath, evalfile, promptlen, complen, prompttype, instructions, window_size=50):
+    def __init__(self, pilepath, evalfile, promptlen, complen, prompttype, instructions='', window_size=50):
         self.mmap_dataset = MMapIndexedDataset(pilepath, skip_warmup = True)
         self.promptlen = promptlen
         self.complen = complen
@@ -27,9 +27,9 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
         self.evalloc = evaldf['loc']
         self.rng = np.random.default_rng(42)
 
-    def set_base_prompt(self, base_prompt_version):
-        
-        self.sys_prompt = BASE_P   
+    def set_default_instructions(self, base_prompt_version=1):
+        # set the base prompt based on the version you want
+        self.instructions = BASE_PROMPTS[base_prompt_version] 
         
     def __len__(self):
         return len(self.evalindices)
@@ -80,8 +80,9 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
             completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
 
 
-
         if self.instructions is not None:
+            if self.instructions is '':
+                self.set_default_instructions()
             prompt = np.concatenate([np.array(self.instructions, dtype=np.int32), prompt])
 
         return {'prompt': torch.from_numpy(prompt), 'completion': torch.from_numpy(completion)}
