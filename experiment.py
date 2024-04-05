@@ -15,7 +15,7 @@ path_to_scratch = os.environ.get("SCRATCH")
 def single_eval_run(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    model = load_pythia_model(args.modelsize, args.modelstep, device=device)
+    model = load_pythia_model(args.modelsize, args.modelstep, device=device, numgpus=args.numgpus)
     model = VLLMModelWrapper(model=model, temperature=args.temperature, best_of=args.beamwidth, 
                              use_beam_search=not args.sampling, max_tokens=args.maxtokens)
     
@@ -37,7 +37,7 @@ def single_eval_run(args):
 
         gen_arr.append({'prompt_ids': prompt_ids, 'completion_ids': completion_ids, 'outgen_ids': outgen_ids})
 
-    with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize']), "wb") as fp:
+    with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize', 'numgpus']), "wb") as fp:
         pickle.dump(gen_arr, fp)
 
 if __name__=="__main__":

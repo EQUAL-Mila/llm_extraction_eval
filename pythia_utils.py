@@ -43,7 +43,8 @@ def cache_check_tokenizer(modelsize, modelstep,):
     if os.path.exists(path_to_scratch + "/%s/%s/" % (modelsize, modelstep) + "tokenizer_config.json"):
         return True
 
-def load_pythia_model(modelsize, modelstep, device='cuda', padding_side='right', truncation_side='right', model_max_length=2048):
+def load_pythia_model(modelsize, modelstep, device='cuda', 
+                      padding_side='right', truncation_side='right', model_max_length=2048, numgpus=1):
 
     modelloc = path_to_scratch + "/%s/%s/" % (modelsize, modelstep)
     if not cache_check_tokenizer(modelsize, modelstep):
@@ -55,7 +56,8 @@ def load_pythia_model(modelsize, modelstep, device='cuda', padding_side='right',
         tokenizer.save_pretrained(modelloc)
 
     model = vllm.LLM(model = f"EleutherAI/{modelsize}", revision = modelstep,
-                     tokenizer= modelloc, download_dir= modelloc, trust_remote_code = True)
+                     tokenizer= modelloc, download_dir= modelloc, trust_remote_code = True,
+                     tensor_parallel_size=numgpus, max_num_seqs=2048)
 
     return model
 

@@ -6,7 +6,7 @@ MIN_INDEX = 0
 
 NUM_SENTENCES = 100000
 
-FILENAME = 'demoidx100000.csv'
+FILENAME = 'finalidx100000.csv'
 
 ### Set random seed and generate a sorted list of indices
 random.seed(0)
@@ -15,6 +15,6 @@ selected_indices.sort()
 
 df = pd.DataFrame({'index': selected_indices})
 ### loc is the point between the prompt p and the completion x.
-df['loc'] = 1000
+df['loc'] = 1024
 
 df.to_csv(FILENAME, index=False)

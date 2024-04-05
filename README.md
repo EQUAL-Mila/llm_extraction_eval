@@ -5,7 +5,7 @@
 - [x] Keep the last few tokens as is, but randomly shuffle all tokens at the start. Same expectation as above. (Code note: Simply change the flag `prompttype` to `end50` to shuffle the initial tokens in the prompt, while keeping the last 50 tokens fixed)
 - [x] Keep the last few and the first few tokens as is, but randomly shuffle all tokens in the middle, or even remove them. Same expectation as above. (Code note: Simply change the flag `prompttype` to `corner50` to shuffle the middle tokens in the prompt, while keeping the last and first 50 tokens each fixed. Change the flag to `corner50del` for the same but middle tokens are deleted instead of being shuffled)
 
-- [ ] Introduce instructions into the prompt to further elicit information out of the model. Are there instructions that can help with data extraction? (Code note: Each instruction set has its own identifier. Use the flag `instructions` and the identifier as input to add those instructions to the prompt. Check function `get_instruction_ids` in file `utils.py` to see those instruction identifiers, or add new instructions)
+- [x] Introduce instructions into the prompt to further elicit information out of the model. Are there instructions that can help with data extraction? (Code note: Each instruction set has its own identifier. Use the flag `instructions` and the identifier as input to add those instructions to the prompt. Check function `get_instruction_ids` in file `utils.py` to see those instruction identifiers, or add new instructions)
 
 
 - [x] Increase beam length and max tokens to see if the generation changes. (Code note: Simply set the flags `beamwidth` and `maxtokens` to change the relevant parameters)
