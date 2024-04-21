@@ -3,6 +3,8 @@ import numpy as np
 import torch
 import Levenshtein
 from transformers import AutoTokenizer
+import zlib
+import evaluate 
 
 def setup_parser():
     parser = argparse.ArgumentParser(description='Extraction Attack: Single Evaluation Run')
@@ -89,3 +91,26 @@ def get_instruction_ids(instruction_identifier):
             raise NotImplementedError("Instruction format %s is not implemented" % instruction_identifier) 
         
         return tokenizer(instruction_string)['input_ids']
+
+
+
+def zlib_ratio(output_tokens):
+    '''
+    - calculate entropy of output based on the Zlib Compression, 
+    - compute perplexity of the output
+    - calculate the ratio of the perplexity and the zlib entropy
+    '''
+
+    text = tokenizer.decode(output_tokens)
+    compressed_text = zlib.compress(text.encode('utf-8'))
+    zlib_score = len(compressed_text)
+
+    # calculate the perplexity of the output
+    evaluate.load("perplexity", module_type="metric")
+    perplexity = evaluate.perplexity(text)
+
+
+    #ratio of the GPT-2 perplexity and the zlib entropy
+    ratio = perplexity / zlib_score
+    return ratio
+
