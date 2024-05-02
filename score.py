@@ -11,7 +11,7 @@ sns.set(rc={'figure.facecolor':'white'}, font_scale=1.6)
 # , 'figure.facecolor':'cornflowerblue'
 palette = itertools.cycle(sns.color_palette())
 
-from utils import setup_parser, get_filename, prompt_scoring
+from utils import setup_parser, get_filename, prompt_scoring, zlib_ratio
 
 path_to_scratch = "/network/scratch/p/prakhar.ganesh/"
 
@@ -59,6 +59,7 @@ def single_eval_score(args):
     # score_arr = score_arr>=500
     # print(np.mean(score_arr))
 
+<<<<<<< HEAD
     # for ite, ind in enumerate(np.where(score_arr)[0]):
     #     print_single_statement(args, ind)
     #     if ite>100:
@@ -149,11 +150,27 @@ def multiple_eval_combined(args):
     plt.tight_layout()
     # plt.savefig('extraction_over_time.pdf')
     plt.savefig('extraction_over_promptlen.pdf')
+=======
+def zlib_eval(args):
+    # computes the ratio of perplexity to zlib-compression entropy for each completion   
+    with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize']), "rb") as fp:
+        gen_arr = pickle.load(fp)   # reading the collection of generated completions 
+
+    for batch in gen_arr:
+        score = zlib_ratio(batch['outgen_ids'])
+        score_arr.extend(scores)
+
+>>>>>>> 1162cffc5cf84cc8d18f17a26147aa1a05edf5f1
 
 if __name__=="__main__":
     parser = setup_parser()
     args = parser.parse_args()
 
     single_eval_score(args)
+<<<<<<< HEAD
     # multiple_eval_combined(args)
     # print_single_statement(args, 0)
+=======
+
+
+>>>>>>> 1162cffc5cf84cc8d18f17a26147aa1a05edf5f1
