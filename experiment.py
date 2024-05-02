@@ -4,6 +4,8 @@ import pickle
 from tqdm import tqdm
 import torch
 
+import wandb
+
 from pythia_utils import load_pythia_model, VLLMModelWrapper
 from prompt_loader import ExtractionPromptDataset
 from utils import setup_parser, get_filename, get_instruction_ids
@@ -40,9 +42,20 @@ def single_eval_run(args):
     with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize', 'numgpus']), "wb") as fp:
         pickle.dump(gen_arr, fp)
 
+    
+
 if __name__=="__main__":
     parser = setup_parser()
     args = parser.parse_args()
     ## TODO: Wandb Setup
+    wandb.login(key='177301ceceab56316ac99630a79d09a45b1da3d6')
+    wandb.init(
+        project='llm-extraction-eval',
+        config={**vars(args), 
+        'completed': 'False'}
+    )
 
     single_eval_run(args)
+
+    wandb.log({'completed': 'True'})
+    wandb.finish()
