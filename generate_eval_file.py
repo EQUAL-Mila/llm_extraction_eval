@@ -6,7 +6,7 @@ MIN_INDEX = 0
 
 NUM_SENTENCES = 100000
 
-FILENAME = 'finalidx100000.csv'
+FILENAME = 'demoidx100000.csv'
 
 ### Set random seed and generate a sorted list of indices
 random.seed(0)

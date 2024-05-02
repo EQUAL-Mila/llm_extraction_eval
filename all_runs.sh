@@ -30,7 +30,7 @@ python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 2
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 300 --maxtokens 300
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 400 --maxtokens 400
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 500 --maxtokens 500
-python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 1000 --maxtokens 1000
+## python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 1000 --maxtokens 1000
 
 ## Changing Prompt type
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype skipalt
@@ -55,7 +55,7 @@ python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --temperatu
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --temperature 0.7
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --temperature 0.8
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --temperature 0.9
-python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --temperature 1.
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --temperature 1.0
 
 ## Changing Beam Width
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --beamwidth 2

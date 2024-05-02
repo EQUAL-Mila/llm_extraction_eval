@@ -5,7 +5,7 @@ import vllm
 from dotenv import load_dotenv
 load_dotenv()
 
-path_to_scratch = os.environ.get("SCRATCH")
+path_to_scratch = "/network/scratch/p/prakhar.ganesh/"
 
 class VLLMModelWrapper:
     def __init__(self, model, temperature=0, best_of=1, use_beam_search=False, seed=0, max_tokens=200, **kwargs):
@@ -57,7 +57,7 @@ def load_pythia_model(modelsize, modelstep, device='cuda',
 
     model = vllm.LLM(model = f"EleutherAI/{modelsize}", revision = modelstep,
                      tokenizer= modelloc, download_dir= modelloc, trust_remote_code = True,
-                     tensor_parallel_size=numgpus, max_num_seqs=2048)
+                     tensor_parallel_size=numgpus, max_num_seqs=50)
 
     return model
 

@@ -10,7 +10,7 @@ from utils import setup_parser, get_filename, get_instruction_ids
 
 from transformers import logging
 logging.set_verbosity_error()
-path_to_scratch = os.environ.get("SCRATCH")
+path_to_scratch = "/network/scratch/p/prakhar.ganesh/"
 
 def single_eval_run(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
