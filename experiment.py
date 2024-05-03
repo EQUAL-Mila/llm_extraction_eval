@@ -56,8 +56,8 @@ if __name__=="__main__":
     wandb.login(key='177301ceceab56316ac99630a79d09a45b1da3d6')
     wandb.init(
         project='llm-extraction-eval',
-        config={**vars(args), 
         name=f"run_{args.modelsize}_{args.modelstep}_{args.promptlen}_{random.randint(0, 1000000)}",
+        config={**vars(args), 
         'completed': False,
         'counter': 0
         }
