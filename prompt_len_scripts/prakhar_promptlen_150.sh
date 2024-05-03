@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 #SBATCH --job-name=150_pythia_run

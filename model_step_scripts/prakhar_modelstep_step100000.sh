@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 #SBATCH --job-name=step100000_pythia_run
