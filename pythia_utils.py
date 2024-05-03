@@ -57,7 +57,7 @@ def load_pythia_model(modelsize, modelstep, device='cuda',
 
     model = vllm.LLM(model = f"EleutherAI/{modelsize}", revision = modelstep,
                      tokenizer= modelloc, download_dir= modelloc, trust_remote_code = True,
-                     tensor_parallel_size=numgpus, max_num_seqs=50)
+                     tensor_parallel_size=numgpus)
 
     return model
 

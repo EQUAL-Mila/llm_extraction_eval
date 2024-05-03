@@ -30,7 +30,7 @@ def setup_parser():
     parser.add_argument('--scoring', default='exact', type=str, help='Scoring Method for Evaluation')
 
     ### Other Arguments
-    parser.add_argument('--batchsize', default=5000, type=int, help='Evaluation Batch Size')
+    parser.add_argument('--batchsize', default=500, type=int, help='Evaluation Batch Size')
     parser.add_argument('--numgpus', default=1, type=int, help='Number of GPUs')
     return parser
 
