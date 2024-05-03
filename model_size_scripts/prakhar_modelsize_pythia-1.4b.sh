@@ -4,7 +4,7 @@
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
 #SBATCH --time=5:00:00
-#SBATCH --mem=48000M
+#SBATCH --mem=32000M
 #SBATCH --gres=gpu:1
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=prakhar.ganesh@mila.quebec
