@@ -5,6 +5,7 @@ from tqdm import tqdm
 import torch
 
 import wandb
+import random
 
 from pythia_utils import load_pythia_model, VLLMModelWrapper
 from prompt_loader import ExtractionPromptDataset
@@ -31,6 +32,7 @@ def single_eval_run(args):
     prompt_loader = torch.utils.data.DataLoader(prompt_dataset, batch_size=args.batchsize, shuffle=False)
 
     gen_arr = []
+    counter = 0
     for sample in tqdm(prompt_loader):
         prompt_ids, completion_ids = sample['prompt'].detach().cpu().tolist(), sample['completion'].detach().cpu().tolist()
 
@@ -38,6 +40,9 @@ def single_eval_run(args):
         outgen_ids = [ele.outputs[0].token_ids for ele in outgen]
 
         gen_arr.append({'prompt_ids': prompt_ids, 'completion_ids': completion_ids, 'outgen_ids': outgen_ids})
+        counter += 1
+        if counter%100==0:
+            wandb.log({'counter': counter})
 
     with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize', 'numgpus']), "wb") as fp:
         pickle.dump(gen_arr, fp)
@@ -47,15 +52,18 @@ def single_eval_run(args):
 if __name__=="__main__":
     parser = setup_parser()
     args = parser.parse_args()
-    ## TODO: Wandb Setup
+    ## NOTE: Wandb Setup
     wandb.login(key='177301ceceab56316ac99630a79d09a45b1da3d6')
     wandb.init(
         project='llm-extraction-eval',
         config={**vars(args), 
-        'completed': 'False'}
+        name=f"run_{args.modelsize}_{args.modelstep}_{args.promptlen}_{random.randint(0, 1000000)}",
+        'completed': False,
+        'counter': 0
+        }
     )
-
+    
     single_eval_run(args)
 
-    wandb.log({'completed': 'True'})
+    wandb.log({'completed': True})
     wandb.finish()
