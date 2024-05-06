@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     DEFAULT_MODEL, DEFAULT_REVISION = "pythia-1.4b", 'step100000'
     prompt = "The quick brown fox jumps over the lazy dog."
-    chosen = 'mpt'
+    chosen = 'redpajama_base'
 
     if chosen == 'pythia':
         model, tokenizer = load_pythia_model(DEFAULT_MODEL, DEFAULT_REVISION)
@@ -130,12 +130,14 @@ if __name__ == "__main__":
 
     if chosen == 'redpajama_chat':
         model = load_redpajama_chat()
-
-    if chosen == 'redpajama_base':
-        model = load_redpajama_base()
         template = "<human>: {instruction}\n<bot>:"
         prompt = template.format(instruction=prompt)
 
+    if chosen == 'redpajama_base':
+        model = load_redpajama_base()
+
+
+    
     model = VLLMModelWrapper(model=model,
                              temperature=0.5,
                              use_beam_search=False,
