@@ -7,7 +7,7 @@ import torch
 import wandb
 import random
 
-from pythia_utils import load_pythia_model, VLLMModelWrapper
+from model_utils import load_pythia_model, VLLMModelWrapper
 from prompt_loader import ExtractionPromptDataset
 from utils import setup_parser, get_filename, get_instruction_ids
 
