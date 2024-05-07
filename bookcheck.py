@@ -1,6 +1,19 @@
 import pandas as pd
 from datasets import load_dataset
 from tqdm import tqdm
+from sentence_transformers import SentenceTransformer
+from sentence_transformers.util import cos_sim
+from Levenshtein import ratio
+import numpy as np
+from FlagEmbedding import FlagModel
+
+
+
+def save_books(set_of_books, filename):
+    # save the books as a file
+    with open(filename, 'w') as f:
+        for item in set_of_books:
+            f.write("%s\n" % item)
 
 def preprocess_books(dataset='books1'):
     '''
@@ -62,43 +75,153 @@ def get_books_outside_pile():
     # read all three texts files in the pile subfolder
     with open('pile_metadata/books1_cleaned.txt', 'r') as f:
         books1 = f.read().splitlines()
+        books1 = [i.replace('-', ' ') for i in books1]
+        print("printing preview")
+        print(books1[:2])
+
     with open('pile_metadata/books3_cleaned.txt', 'r') as f:
         books3 = f.read().splitlines()
+        books3 = [i.replace('-', ' ') for i in books3]
+        books3 = [i.lower() for i in books3]
+        print("printing preview")
+        print(books3[:2])
 
     with open('pile_metadata/pg19.txt', 'r') as f:
         pg19 = f.read().splitlines()
 
     big_pile = books1 + books3 + pg19
+
+    print("the length of books1 is: ", len(books1))
+    print("the length of books3 is: ", len(books3))
+    print("the length of pg19 is: ", len(pg19))
     print("the length of the big pile is: ")
     print(len(big_pile))
-
+    print("\n ---- \n")
     # read the pg_catalog.csv file
     pg_catalog = load_pg_metadata()
+    print("the length of the pg metadata is: ", len(pg_catalog))
 
     #identify books that are not in the pile buit are in the pg_catalog
-    books_outside_pile = []
+    books_outside_pile = set()
+
+    books_outside_pg19, books_outside_books1, books_outside_books3 = set(
+    ), set(), set()
+
+    stats = {
+        'in_books1': 0,
+        'in_books3': 0,
+        'in_pg19': 0,
+    }
+    # !BOOKS 1
+
+    # model = SentenceTransformer('llmrails/ember-v1')
+
     for book in tqdm(pg_catalog):
         book_names = book.lower().split()
         number_of_pieces = len(book_names)
         detected_count = 0
 
-        for sentence in big_pile:
+        for sentence in books1:
+
+            if ratio(sentence.split(), book.split()) > 0.70:
+                detected_count += 1
+                stats['in_books1'] += 1
+                break
+
+        if detected_count == 0:
+            books_outside_pile.add(book)
+            books_outside_books1.add(book)
+            detected_count = 0
+            for sentence in books3:
+                if ratio(sentence.split(), book.split()) > 0.70:
+                    detected_count += 1
+                    stats['in_books3'] += 1
+                    break
+
+        if detected_count == 0:
+            books_outside_pile.add(book)
+            books_outside_books3.add(book)
+            detected_count = 0
+
+            for sentence in pg19:
+                if ratio(sentence.split(), book.split()) > 0.70:
+                    detected_count += 1
+                    stats['in_pg19'] += 1
+                    break
+
+        if detected_count == 0:
+            books_outside_pile.add(book)
+            books_outside_pg19.add(book)
+
+    print("Books outside books1:", len(books_outside_books1))
+    print("Books outside books3:", len(books_outside_books3))
+    print("Books outside pg19:", len(books_outside_pg19))
+
+    print("Books outside pile:", len(books_outside_pile))
+    print("Total books in pile:", len(big_pile))
+
+    print(stats)
+    """
+    # -----------------------------------------------------
+    # !BOOKS 3
+    for book in tqdm(pg_catalog):
+        book_names = book.lower().split()
+        number_of_pieces = len(book_names)
+        detected_count = 0
+
+        for sentence in books3:
             if book in sentence:
                 detected_count += 1
+                stats['in_books3'] += 1
+                break
+
+        if detected_count == 0:
+            books_outside_pile.add(book)
+            books_outside_books3.add(book)
+
+
+
+    print("Books outside books1:", len(books_outside_books1))
+    print("Books outside books3:", len(books_outside_books3))
+    print("Books outside pg19:", len(books_outside_pg19))
+
+    print("Books outside pile:", len(books_outside_pile))
+    print("Total books in pile:", len(big_pile))
+    # -----------------------------------------------------
+    # !PG19
+    for book in tqdm(pg_catalog):
+        book_names = book.lower().split()
+        number_of_pieces = len(book_names)
+        detected_count = 0
+
+        for sentence in books3:
+            if book in sentence:
+                detected_count += 1
+                stats['in_pg19'] += 1
                 break
             # if detected_count / number_of_pieces > 0.75:
             #     continue
-
         if detected_count == 0:
-            books_outside_pile.append(book)
+            books_outside_pile.add(book)
+            books_outside_pg19.add(book)
             # save the books outside the pile to a text file
-            with open('pile_metadata/books_outside_pile.txt', 'w') as f:
-                for item in books_outside_pile:
-                    f.write("%s\n" % item)
 
     print("\n -- Some stats -- \n")
+
+    print("Books outside books1:", len(books_outside_books1))
+    print("Books outside books3:", len(books_outside_books3))
+    print("Books outside pg19:", len(books_outside_pg19))
+
     print("Books outside pile:", len(books_outside_pile))
     print("Total books in pile:", len(big_pile))
+    print(book_stats)
+
+    with open('pile_metadata/books_outside_pile_v2.txt', 'w') as f:
+        for item in books_outside_pile:
+            f.write("%s\n" % item)
+    """
+
+    save_books(books_outside_pile, 'the_books_outside_pile_v2.txt')
 
 if __name__ == '__main__':
     # preprocess_books('books3')
