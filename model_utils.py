@@ -35,8 +35,8 @@ class VLLMModelWrapper:
         self.sampling_params = vllm.SamplingParams(temperature=temperature, best_of=best_of, max_tokens=max_tokens,
                                                    use_beam_search=(best_of>1 and use_beam_search), seed=seed, ignore_eos=True)
 
-    def generate_text(self, prompt=None, prompt_token_ids=None):
-        return self.model.generate(prompts=prompt, sampling_params=self.sampling_params, prompt_token_ids=prompt_token_ids)
+    def generate_text(self, prompts=None, prompt_token_ids=None):
+        return self.model.generate(prompts=prompts, sampling_params=self.sampling_params, prompt_token_ids=prompt_token_ids)
 
 def cache_check_tokenizer(modelsize, modelstep,):
     '''
@@ -64,36 +64,69 @@ def load_pythia_model(modelsize, modelstep, device='cuda',
     return model
 
 
+def load_gemma_2():
+    model_name = 'google/gemma-2b'
+    gemma = vllm.LLM(model=model_name,
+                     trust_remote_code=True,
+                     max_model_len=2048,
+                     tensor_parallel_size=1)
+    return gemma
+
+
+def load_gemma_7():
+    model_name = 'google/gemma-7b'
+    gemma = vllm.LLM(model=model_name,
+                        trust_remote_code=True,
+                        max_model_len=2048,
+                        tensor_parallel_size=1)
+    return gemma
+
 
 
 def load_llama_together():
     model_name = "togethercomputer/LLaMA-2-7B-32K"
     llama = vllm.LLM(model=model_name,
-                     trust_remote_code=True, max_model_len=2048)
+                     trust_remote_code=True, max_model_len=2048, tensor_parallel_size=1)
     return llama
 
 def load_mpt_7b():
     model_name = "mosaicml/mpt-7b"
     mpt = vllm.LLM(model=model_name,
-                     trust_remote_code=True,max_model_len=2048)
+                     trust_remote_code=True,max_model_len=2048, tensor_parallel_size=1)
     return mpt
 
 
 def load_phi():
     model_name = "microsoft/phi-2"
-    phi = vllm.LLM(model=model_name, trust_remote_code=True, max_model_len=2048)
+    phi = vllm.LLM(model=model_name, trust_remote_code=True, max_model_len=2048, tensor_parallel_size=1)
     return phi
 
 
+def load_gpt2():
+    model_name = "openai-community/gpt2"
+    gpt2 = vllm.LLM(model=model_name, trust_remote_code=True, tensor_parallel_size=1)
+    return gpt2
+
 def load_redpajama_chat():
     model_name = "togethercomputer/RedPajama-INCITE-7B-Chat"
-    redpajama = vllm.LLM(model=model_name, trust_remote_code=True)
+    redpajama = vllm.LLM(model=model_name, trust_remote_code=True, tensor_parallel_size=1)
     return redpajama
+
 
 def load_redpajama_base():
     model_name = "togethercomputer/RedPajama-INCITE-7B-Base"
-    redpajama = vllm.LLM(model=model_name, trust_remote_code=True)
+    redpajama = vllm.LLM(model=model_name,
+                         trust_remote_code=True,
+                         tensor_parallel_size=1)
     return redpajama
+
+
+def load_falcon():
+    model_name = "tiiuae/falcon-7b"
+    falcon = vllm.LLM(model=model_name,
+                      trust_remote_code=True,
+                      tensor_parallel_size=1)
+    return falcon
 
 
 if __name__ == "__main__":
@@ -137,7 +170,7 @@ if __name__ == "__main__":
         model = load_redpajama_base()
 
 
-    
+
     model = VLLMModelWrapper(model=model,
                              temperature=0.5,
                              use_beam_search=False,

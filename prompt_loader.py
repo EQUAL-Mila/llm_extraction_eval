@@ -5,13 +5,14 @@ import torch
 from mmap_dataset import MMapIndexedDataset
 
 class ExtractionPromptDataset(torch.utils.data.Dataset):
-    def __init__(self, pilepath, evalfile, promptlen, complen, prompttype, instructions, window):
+    def __init__(self, pilepath, evalfile, promptlen, complen, prompttype, instructions, window, mask_token):
         self.mmap_dataset = MMapIndexedDataset(pilepath, skip_warmup = True)
         self.promptlen = promptlen
         self.complen = complen
         self.prompttype = prompttype
         self.instructions = instructions
         self.window = window
+        self.mask_token = mask_token
 
         evaldf = pd.read_csv(evalfile)
         self.evalindices = evaldf['index']
@@ -32,6 +33,21 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
             prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
             completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)
      
+        elif self.prompttype == 'reduce':
+            prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
+            # remove random tokens from the prompt
+            indices = np.random.choice(len(prompt), int((self.window/100)*len(prompt)), replace=False) # window here refefs to the percentage
+            prompt = np.delete(prompt, indices)
+            completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)    
+        
+        elif self.prompttype=='masktoken':
+            prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
+            # choose random tokens from the prompt
+            indices = np.random.choice(len(prompt), int((self.window/100)*len(prompt)), replace=False) #
+            prompt[indices] = self.mask_token
+
+            completion = np.array(sentence[loc:loc+self.complen], dtype=np.int32)    
+        
         elif self.prompttype=='skipalt':
             prompt = np.array(sentence[loc-self.promptlen:loc], dtype=np.int32)
             if len(prompt)%2==0: prompt = prompt[1::2]
