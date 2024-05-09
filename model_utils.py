@@ -64,6 +64,23 @@ def load_pythia_model(modelsize, modelstep, device='cuda',
     return model
 
 
+def load_gemma_2():
+    model_name = 'google/gemma-2b'
+    gemma = vllm.LLM(model=model_name,
+                     trust_remote_code=True,
+                     max_model_len=2048,
+                     tensor_parallel_size=1)
+    return gemma
+
+
+def load_gemma_7():
+    model_name = 'google/gemma-7b'
+    gemma = vllm.LLM(model=model_name,
+                        trust_remote_code=True,
+                        max_model_len=2048,
+                        tensor_parallel_size=1)
+    return gemma
+
 
 
 def load_llama_together():
