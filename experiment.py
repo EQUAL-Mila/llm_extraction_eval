@@ -7,7 +7,9 @@ import torch
 import wandb
 import random
 
-from model_utils import load_pythia_model, VLLMModelWrapper, load_llama_together, load_mpt_7b, load_phi, load_gpt2, load_redpajama_base
+from model_utils import load_pythia_model, VLLMModelWrapper, load_llama_together, load_mpt_7b, load_phi, load_falcon, load_gpt2
+from model_utils import load_gemma_7, load_gemma_2, load_redpajama_base
+
 from prompt_loader import ExtractionPromptDataset
 from utils import setup_parser, get_filename, get_instruction_ids, get_mask_token_id
 
@@ -37,6 +39,10 @@ def single_eval_run(args):
         model = load_gpt2()
     if 'falcon' in args.modelsize:
         model = load_falcon()
+    if 'gemma2' in args.modelsize:
+        model = load_gemma_2()
+    if 'gemma7' in args.modelsize:
+        model = load_gemma_7()
 
     model = VLLMModelWrapper(model=model,
                              temperature=args.temperature,
@@ -66,6 +72,8 @@ def single_eval_run(args):
                                                 shuffle=False)
 
     gen_arr = []
+                    
+                    
     counter = 0
     for sample in tqdm(prompt_loader):
         prompt_ids, completion_ids = sample['prompt'].detach().cpu().tolist(
@@ -77,10 +85,12 @@ def single_eval_run(args):
         else:
             prompts = tokenizer.batch_decode(np.array(prompt_ids))
             outgen = model.generate_text(prompts=prompts)
-            outgen = [ele.outputs[0].text for ele in outgen]
+            outgen = [str(ele.outputs[0].text) for ele in outgen]
+            outgen_ids = tokenizer.encode(outgen, is_split_into_words=True)
+            # for ele in outgen:
+            #     print(ele)
+            #     outgen_ids = tokenizer.encode(ele)
 
-            outgen_ids = tokenizer.encode(outgen)
-            
         gen_arr.append({
             'prompt_ids': prompt_ids,
             'completion_ids': completion_ids,
@@ -89,10 +99,9 @@ def single_eval_run(args):
         counter += 1
         wandb.log({'counter': counter})
 
-    with open(
-            path_to_scratch + '/extraction_results/' + get_filename(
-                args, args_ignore=['scoring', 'batchsize', 'numgpus']),
-            "wb") as fp:
+    with open(path_to_scratch + '/extraction_results/' + get_filename(
+             args, args_ignore=['scoring', 'batchsize', 'numgpus']),
+             "wb") as fp:
         pickle.dump(gen_arr, fp)
 
 
