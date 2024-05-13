@@ -44,7 +44,7 @@ def get_filename(args, args_ignore=None):
 
     return filename[:-2] + '.log'
 
-def prompt_scoring(orig_ids, gen_ids, scoring='exact'):
+def prompt_scoring(orig_ids, gen_ids, scoring='exact', levenshtein_delta=0.8):
     orig_ids, gen_ids = np.array(orig_ids), np.array(gen_ids)
     ## TODO: It records the perfect match for now, but we want to record how much matches later.
     if scoring=='exact':
@@ -58,9 +58,9 @@ def prompt_scoring(orig_ids, gen_ids, scoring='exact'):
     elif scoring=="levenshtein":
         outscores = []
         for origid, genid in zip(orig_ids, gen_ids):
-            score = Levenshtein.distance(origid, genid)
+            score = Levenshtein.ratio(origid, genid)
             outscores.append(score)
-        return np.array(outscores)
+        return np.array(outscores) >= levenshtein_delta
     else:
         raise NotImplementedError("Evaluation scoring method %s is not implemented" % scoring)
 
