@@ -50,16 +50,16 @@ def single_eval_score(args):
 
     score_arr = []
     for batch in gen_arr:
-        scores = prompt_scoring(batch['completion_ids'], batch['outgen_ids'], args.scoring)
+        scores = prompt_scoring(batch['completion_ids'], batch['outgen_ids'], args.scoring, levenshtein_delta=1.)
         score_arr.extend(scores)
     
     score_arr = np.array(score_arr)
-    print(score_arr)
+    print(np.mean(score_arr))
+    exit()
     # score_arr = np.logical_and(score_arr<5, score_arr>0)
     # score_arr = score_arr>=500
     # print(np.mean(score_arr))
 
-<<<<<<< HEAD
     # for ite, ind in enumerate(np.where(score_arr)[0]):
     #     print_single_statement(args, ind)
     #     if ite>100:
@@ -84,6 +84,38 @@ def single_eval_score(args):
     plt.tight_layout()
     # plt.savefig('hist_length.pdf')
     plt.savefig('hist_levenshtein.pdf')
+
+def multiple_eval_single_axis(args, var_name, var_list, ld=1.):
+    all_scores = []
+    all_acc = []
+    for var_val in tqdm(var_list):
+        setattr(args, var_name, var_val)
+        with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize', 'numgpus']), "rb") as fp:
+            gen_arr = pickle.load(fp)
+
+        score_arr = []
+        for batch in gen_arr:
+            scores = prompt_scoring(batch['completion_ids'], batch['outgen_ids'], args.scoring, levenshtein_delta=ld)
+            score_arr.extend(scores)
+
+        score_arr = np.array(score_arr)
+        all_scores.append(score_arr)
+
+        all_acc.append(100*np.mean(score_arr))
+    
+    ## Extracted in at least one
+    combined_scores = np.max(all_scores, axis=0)
+
+    color1 = next(palette)
+    plt.scatter(var_list, all_acc, color=color1)
+    plt.plot(var_list, all_acc, '--', color=color1)
+    plt.plot(var_list, [100*np.mean(combined_scores)]*len(var_list), '--', color='red', linewidth=4)
+    plt.ylabel('Extraction Rate', labelpad=10)
+    plt.xlabel(var_name, labelpad=10)
+    plt.ylim(0, 4.)
+    plt.tight_layout()
+    plt.savefig('extraction_single_axis_%s.pdf' % var_name)
+
 
 def multiple_eval_combined(args):
     args_change = {
@@ -150,7 +182,8 @@ def multiple_eval_combined(args):
     plt.tight_layout()
     # plt.savefig('extraction_over_time.pdf')
     plt.savefig('extraction_over_promptlen.pdf')
-=======
+
+
 def zlib_eval(args):
     # computes the ratio of perplexity to zlib-compression entropy for each completion   
     with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize']), "rb") as fp:
@@ -160,17 +193,14 @@ def zlib_eval(args):
         score = zlib_ratio(batch['outgen_ids'])
         score_arr.extend(scores)
 
->>>>>>> 1162cffc5cf84cc8d18f17a26147aa1a05edf5f1
 
 if __name__=="__main__":
     parser = setup_parser()
     args = parser.parse_args()
 
     single_eval_score(args)
-<<<<<<< HEAD
+    multiple_eval_single_axis(args, 'promptlen', [50, 100, 150, 200, 250, 300, 350, 400, 450, 500], 1.)
     # multiple_eval_combined(args)
     # print_single_statement(args, 0)
-=======
 
 
->>>>>>> 1162cffc5cf84cc8d18f17a26147aa1a05edf5f1
