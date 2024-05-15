@@ -85,7 +85,7 @@ def single_eval_score(args):
     # plt.savefig('hist_length.pdf')
     plt.savefig('hist_levenshtein.pdf')
 
-def multiple_eval_single_axis(args, var_name, var_list, ld=1.):
+def multiple_eval_single_axis(args, var_name, var_list, ld):
     all_scores = []
     all_acc = []
     for var_val in tqdm(var_list):
@@ -114,8 +114,53 @@ def multiple_eval_single_axis(args, var_name, var_list, ld=1.):
     plt.xlabel(var_name, labelpad=10)
     plt.ylim(0, 4.)
     plt.tight_layout()
-    plt.savefig('extraction_single_axis_%s.pdf' % var_name)
+    plt.savefig('extraction_single_axis_%s_%f_multi.png' % (var_name, ld))
 
+def multiple_eval_multiple_axis(args, var1_name, var1_list, var2_name, var2_list, var3_name, var3_list, ld):
+    all_scores = []
+    all_acc = []
+    for var1_val in tqdm(var1_list):
+        all_scores1 = []
+        all_acc1 = []
+        for var2_val in tqdm(var2_list):
+            all_scores2 = []
+            all_acc2 = []
+            for var3_val in tqdm(var3_list):
+                setattr(args, var1_name, var1_val)
+                setattr(args, var2_name, var2_val)
+                setattr(args, var3_name, var3_val)
+                try:
+                    with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize', 'numgpus']), "rb") as fp:
+                        gen_arr = pickle.load(fp)
+                except:
+                    print(args)
+
+                score_arr = []
+                for batch in gen_arr:
+                    scores = prompt_scoring(batch['completion_ids'], batch['outgen_ids'], args.scoring, levenshtein_delta=ld)
+                    score_arr.extend(scores)
+
+                score_arr = np.array(score_arr)
+                all_scores2.append(score_arr)
+
+                all_acc2.append(100*np.mean(score_arr))
+            all_scores1.append(all_scores2)
+            all_acc1.append(all_acc2)
+        all_scores.append(all_scores1)
+        all_acc.append(all_acc1)
+    
+    ## Extracted in at least one
+    # print(np.shape(all_scores))
+    print(all_acc)
+    print(np.mean(np.max(all_scores, axis=0), axis=-1))
+    print(np.mean(np.max(all_scores, axis=1), axis=-1))
+    print(np.mean(np.max(all_scores, axis=2), axis=-1))
+    print(np.mean(np.max(all_scores, axis=(0, 1)), axis=-1))
+    print(np.mean(np.max(all_scores, axis=(1, 2)), axis=-1))
+    print(np.mean(np.max(all_scores, axis=(0, 2)), axis=-1))
+    print(np.mean(np.max(all_scores, axis=(0, 1, 2)), axis=-1))
+    # combined_scores = np.max(all_scores, axis=0)
+    # print(combined_scores)
 
 def multiple_eval_combined(args):
     args_change = {
@@ -198,8 +243,16 @@ if __name__=="__main__":
     parser = setup_parser()
     args = parser.parse_args()
 
-    single_eval_score(args)
-    multiple_eval_single_axis(args, 'promptlen', [50, 100, 150, 200, 250, 300, 350, 400, 450, 500], 1.)
+    # single_eval_score(args)
+
+    # multiple_eval_single_axis(args, 'promptlen', [50, 100, 150, 200, 250, 300, 350, 400, 450, 500], 0.9)
+    # multiple_eval_single_axis(args, 'modelstep', ['step100000', 'step105000', 'step110000', 'step115000',
+    #                                               'step120000', 'step125000', 'step130000', 'step135000', 'step140000'], 0.7)
+    # multiple_eval_single_axis(args, 'modelsize', ['pythia-1b', 'pythia-1.4b', 'pythia-2.8b', 'pythia-6.9b', 'pythia-12b'], 1.)
+
+    multiple_eval_multiple_axis(args, 'promptlen', [100, 300, 500], 'modelstep', ['step100000', 'step120000', 'step140000'],
+                                'modelsize', ['pythia-1.4b', 'pythia-2.8b', 'pythia-6.9b'], 1.)
+
     # multiple_eval_combined(args)
     # print_single_statement(args, 0)
 
