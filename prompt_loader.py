@@ -29,17 +29,23 @@ class ExtractionPromptDataset(torch.utils.data.Dataset):
         if dataset_type == 'pythia':
             self.mmap_dataset = MMapIndexedDataset(pilepath, skip_warmup=True)
         else:
-            data_order_file_path = cached_path(
-                "https://olmo-checkpoints.org/ai2-llm/olmo-medium/wvc30anm/train_data/global_indices.npy"
-            )
-            data_order_file_path = "/network/scratch/y/yash.more/scratch/llm_extraction_eval/global_indices.npy"
-            
-            train_config_path = "./OLMo/configs/official/OLMo-7B.yaml"
-            cfg = TrainConfig.load(train_config_path)
-            self.dataset = build_memmap_dataset(cfg, cfg.data)
-            self.global_indices = np.memmap(data_order_file_path,
-                                            mode="r+",
-                                            dtype=np.uint32)
+            # data_order_file_path = cached_path(
+            #     "https://olmo-checkpoints.org/ai2-llm/olmo-medium/wvc30anm/train_data/global_indices.npy"
+            # )
+            data_order_file_path = "/network/scratch/y/yash.more/llm_extraction_eval/global_indices.npy"
+
+            # train_config_path = "./OLMo/configs/official/OLMo-7B.yaml"
+
+            train_config_path = "./config_local.yaml"
+
+                cfg = TrainConfig.load(train_config_path)
+                self.dataset = build_memmap_dataset(cfg, cfg.data)
+                self.global_indices = np.memmap(data_order_file_path,
+                                                mode="r+",
+                                                dtype=np.uint32)
+
+                self.global_indices = np.arange(0,len(self.dataset)) # lets try this
+
             print("\n-- Global indices: --\n")
             print(self.global_indices[:10])
 
