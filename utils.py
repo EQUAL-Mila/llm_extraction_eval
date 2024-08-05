@@ -139,7 +139,7 @@ def get_instruction_ids(instruction_identifier, dataset_type='pythia'):
 
 def calculatePerplexityHF(sentence, model, tokenizer):
     """
-    exp(loss)
+    Returns the perplexity of a given sentence using the model and tokenizer
     """
     input_ids = torch.tensor(tokenizer.encode(sentence)).unsqueeze(0)
     input_ids = input_ids.to(device)
@@ -151,47 +151,130 @@ def calculatePerplexityHF(sentence, model, tokenizer):
 
 
 def calculatePerplexity(sentence, model, tokenizer):
-    sampling_params = vllm.SamplingParams(
-        temperature=0,
-        best_of=1,
-        max_tokens=200,
-        use_beam_search=(best_of > 1 and use_beam_search),
-        seed=0,
-        ignore_eos=True)
-    outgen = model.generate_text(prompts=sentence,
-                                 sampling_params=sampling_params,
-                                 prompt_logprobs=1)
+
+    sampling_params = vllm.SamplingParams(temperature=0,
+                                          best_of=1,
+                                          max_tokens=200,
+                                          seed=0,
+                                          ignore_eos=True,
+                                          prompt_logprobs=1)
+
+    outgen = model.generate(prompts=sentence, sampling_params=sampling_params)
     prompt_logprobs = outgen[
         0].prompt_logprobs  # list of logprobs for each token in the prompt
 
     processed_logprobs = []
-    for input_token in prompt_logprobs:
+    for input_token in prompt_logprobs[1:]:  # first one is None
         # get the first key
         most_probable_id = list(input_token.keys())[0]
         # get the log probability of the most probable token
         log_prob = input_token[most_probable_id].logprob
         processed_logprobs.append(log_prob)
 
-    sum_log_probs = sum(log_probs)
+    sum_log_probs = sum(processed_logprobs)
 
     # Step 2: Calculate the average log probability
-    N = len(log_probs)
+    N = len(processed_logprobs)
     avg_log_prob = sum_log_probs / N
 
+    print("Calculating perplixty...")
     # Step 3: Compute perplexity
     perplexity = np.exp(-avg_log_prob)
 
     return perplexity
 
 
-def zlib_ratio(output_generations, comp_generations, model, tokenizer):
+def calculatePerplexitySentences(sentences, model, tokenizer):
+    '''
+    This function takes in a batch of decoded sentences/inputs and generates the perplexity of each sentence.
+    returns a list of perplexities
+    '''
+    sampling_params = vllm.SamplingParams(temperature=0,
+                                          best_of=1,
+                                          max_tokens=200,
+                                          seed=0,
+                                          ignore_eos=True,
+                                          prompt_logprobs=1)
+
+    outgens = model.generate(prompts=sentences,
+                             sampling_params=sampling_params)
+
+    list_of_perplexities = []
+    for outgen in outgens:
+        prompt_logprobs = outgen.prompt_logprobs  # list of logprobs for each token in the prompt
+
+        processed_logprobs = []
+        for input_token in prompt_logprobs[1:]:  # first one is None
+            # get the first key
+            most_probable_id = list(input_token.keys())[0]
+            # get the log probability of the most probable token
+            log_prob = input_token[most_probable_id].logprob
+            processed_logprobs.append(log_prob)
+
+        sum_log_probs = sum(processed_logprobs)
+
+        # Step 2: Calculate the average log probability
+        N = len(processed_logprobs)
+        avg_log_prob = sum_log_probs / N
+
+        # print("Calculating perplixty...")
+        # Step 3: Compute perplexity
+        perplexity = np.exp(-avg_log_prob)
+        list_of_perplexities.append(perplexity)
+
+    return list_of_perplexities
+
+
+def zlib_ratio(output_generations, orig_generations, model, tokenizer):
+    """
+    Return the ratio of the size of the compressed text to the size of the
+    uncompressed text. 
+    Args: output generations ( prompt + llm output)
+          orig generations (prompt + orig suffix)
+    Returns:
+        
+    """
+    original_gen_ratios, output_gen_ratios = [], []
+    print("Calculating perpleixty for output generations...")
+    p1_list = calculatePerplexitySentences(output_generations, model,
+                                           tokenizer)
+
+    print("Calculating perpleixty for original generations...")
+    p2_list = calculatePerplexitySentences(orig_generations, model, tokenizer)
+
+    output_entropies = [
+        len(zlib.compress(bytes(output, 'utf-8')))
+        for output in output_generations
+    ]
+    orig_entropies = [
+        len(zlib.compress(bytes(original_output, 'utf-8')))
+        for original_output in orig_generations
+    ]
+
+    print("Calculating zlib ratios...")
+    for p1, p2, output_entropy, orig_entropy in zip(p1_list, p2_list,
+                                                    output_entropies,
+                                                    orig_entropies):
+        ratio_output = output_entropy / np.log(p1)
+        ratio_orig = orig_entropy / np.log(p2)
+
+        original_gen_ratios.append(ratio_orig)
+        output_gen_ratios.append(ratio_output)
+
+    return original_gen_ratios, output_gen_ratios
+
+
+def zlib_ratio_unoptimized(output_generations, orig_generations, model, tokenizer):
     """
     Return the ratio of the size of the compressed text to the size of the
     uncompressed text.
     """
-    original_gen_ratios, compressed_gen_ratios = [], []
+    original_gen_ratios, output_gen_ratios = [], []
 
-    for output, original_output in zip(output_generations, comp_generations):
+
+
+
+    for output, original_output in zip(output_generations, orig_generations):
 
         compressed_output_entropy = len(zlib.compress(bytes(output, 'utf-8')))
         compressed_orig_entropy = len(
@@ -206,11 +289,11 @@ def zlib_ratio(output_generations, comp_generations, model, tokenizer):
             p2)  # zlib ratio for original output
 
         original_gen_ratios.append(ratio_orig)
-        compressed_gen_ratios.append(ratio_output)
+        output_gen_ratios.append(ratio_output)
 
     # # compressed = zlib.compress(bytes(text, 'utf-8'))
     # zlib_entropy = len(zlib.compress(bytes(text, 'utf-8')))
     # p1 = calculatePerplexity(text, model, tokenizer)
 
     # ratio = zlib_entropy / np.log(p1)
-    return original_gen_ratios, compressed_gen_ratios
+    return original_gen_ratios, output_gen_ratios

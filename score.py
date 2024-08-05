@@ -21,6 +21,10 @@ path_to_scratch = "/network/scratch/p/prakhar.ganesh/"
 
 
 def print_single_statement(args, idx):
+    print("using .. ")
+    print(path_to_scratch + '/extraction_results/' +
+          get_filename(args, args_ignore=['scoring', 'batchsize', 'numgpus']))
+
     with open(
             path_to_scratch + '/extraction_results/' + get_filename(
                 args, args_ignore=['scoring', 'batchsize', 'numgpus']),
@@ -42,7 +46,8 @@ def print_single_statement(args, idx):
         print("\n----\n")
         print('prompt_ids shape', len(batch['prompt_ids']),
               len(batch['prompt_ids'][1]),
-              tokenizer.batch_decode(batch['prompt_ids'][:2]), len(tokenizer.batch_decode(batch['prompt_ids'])))
+              tokenizer.batch_decode(batch['prompt_ids'][:2]),
+              len(tokenizer.batch_decode(batch['prompt_ids'])))
         print('completion_ids shape', len(batch['completion_ids']),
               len(batch['completion_ids'][0]))
         print("comparing indexes of prompt and batch completions")
@@ -287,8 +292,8 @@ def zlib_eval(args):
             truncation_side = 'right'
             model_max_length = 2048
             tokenizer = AutoTokenizer.from_pretrained(
-                "EleutherAI/%s" % modelsize,
-                revision=modelstep,
+                "EleutherAI/%s" % args.modelsize,
+                revision=args.modelstep,
                 padding_side=padding_side,
                 truncation_side=truncation_side,
                 model_max_length=model_max_length)
@@ -310,8 +315,8 @@ def zlib_eval(args):
             truncation_side = 'right'
             model_max_length = 2048
             tokenizer = AutoTokenizer.from_pretrained(
-                "EleutherAI/%s" % modelsize,
-                revision=modelstep,
+                "EleutherAI/%s" % args.modelsize,
+                revision=args.modelstep,
                 padding_side=padding_side,
                 truncation_side=truncation_side,
                 model_max_length=model_max_length)
@@ -322,13 +327,16 @@ def zlib_eval(args):
 
     # computes the ratio of perplexity to zlib-compression entropy for each completion
     with open(
-            path_to_scratch + '/extraction_results/' +
-            get_filename(args, args_ignore=['scoring', 'batchsize']),
+            path_to_scratch + '/extraction_results/' + get_filename(
+                args, args_ignore=['scoring', 'batchsize', 'numgpus']),
             "rb") as fp:
         gen_arr = pickle.load(
             fp)  # reading the collection of generated completions
 
-    for batch in gen_arr:
+    ORIG_RATIOS = []
+    GEN_RATIOS = []
+
+    for batch in tqdm(gen_arr):
 
         prompt_generations = tokenizer.batch_decode(
             batch['prompt_ids']
@@ -338,20 +346,54 @@ def zlib_eval(args):
         )  # list of X generations with Ox tokens each (decoded)
         comp_gen = tokenizer.batch_decode(
             batch['completion_ids']
-        ) # list of X original gens with C tokens each (decoded)
+        )  # list of X original gens with C tokens each (decoded)
 
         #join them together
         completion_texts = [
-            prompt + output for prompt, output in zip(prompt_generations, output_generations)
+            prompt + output
+            for prompt, output in zip(prompt_generations, output_generations)
         ]
         original_texts = [
-            prompt + suffix for prompt, suffix in zip(prompt_generations, comp_gen)
+            prompt + suffix
+            for prompt, suffix in zip(prompt_generations, comp_gen)
         ]
 
-        score = zlib_ratio(completion_texts, original_texts, model, tokenizer)
+        original_gen_ratios, output_gen_ratios = zlib_ratio(
+            output_generations=completion_texts,
+            orig_generations=original_texts,
+            model=model,
+            tokenizer=tokenizer)
 
-        # score = zlib_ratio(batch['outgen_ids'])
-        # score_arr.extend(scores)
+        print("original generation ratios:")
+        print(original_gen_ratios[:10])
+        print("\n -------- \n")
+        print("output generation ratios:")
+        print(output_gen_ratios[:10])
+
+        ORIG_RATIOS.extend(original_gen_ratios)
+        GEN_RATIOS.extend(output_gen_ratios)
+
+        print("\n ######\n###### \n")
+
+    with open(
+            path_to_scratch + '/zlib_scores/' + get_filename(
+                args, args_ignore=['scoring', 'batchsize', 'numgpus']),
+            "wb") as fp:
+
+        pickle.dump({
+            'original_gen_ratios': ORIG_RATIOS,
+            'output_gen_ratios': GEN_RATIOS
+        }, fp)
+
+    # print('now testing loading')
+
+    # with open(
+    #     path_to_scratch + '/zlib_scores/' + get_filename(
+    #         args, args_ignore=['scoring', 'batchsize', 'numgpus']),
+    #     "rb") as fp:
+    #     data = pickle.load(fp)
+    # print(data)
+
 
 
 
@@ -367,8 +409,10 @@ if __name__ == "__main__":
 
         # single_eval_score(args)
         # multiple_eval_single_axis(args, 'promptlen', [100, 150, 200, 250, 300, 350, 400, 450, 500], 0.9)
-        multiple_eval_single_axis(args, 'modelstep', ['step300000', 'step360000','step400000','step440000', 'step480000'], 0.9)
-
+        multiple_eval_single_axis(args, 'modelstep', [
+            'step300000', 'step360000', 'step400000', 'step440000',
+            'step480000'
+        ], 0.9)
 
     # single_eval_score(args)
 
@@ -381,4 +425,6 @@ if __name__ == "__main__":
     #                             'modelsize', ['pythia-1.4b', 'pythia-2.8b', 'pythia-6.9b'], 1.)
 
     # multiple_eval_combined(args)
-    print_single_statement(args, 0)
+    # print_single_statement(args, 0)
+
+    zlib_eval(args)
