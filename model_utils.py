@@ -1,6 +1,8 @@
 import os
 from transformers import AutoTokenizer, GPTNeoXForCausalLM
 from transformers import GPTNeoXConfig
+from huggingface_hub import list_repo_refs
+
 import vllm
 from dotenv import load_dotenv
 load_dotenv()
@@ -45,31 +47,84 @@ def cache_check_tokenizer(modelsize, modelstep,):
     if os.path.exists(path_to_scratch + "/%s/%s/" % (modelsize, modelstep) + "tokenizer_config.json"):
         return True
 
-def load_pythia_model(modelsize, modelstep, device='cuda',
-                      padding_side='right', truncation_side='right', model_max_length=2048, numgpus=1):
+
+def load_pythia_model(modelsize,
+                      modelstep,
+                      device='cuda',
+                      padding_side='right',
+                      truncation_side='right',
+                      model_max_length=2048,
+                      gpu_memory_utilization=0.9,
+                      numgpus=1):
 
     modelloc = path_to_scratch + "/%s/%s/" % (modelsize, modelstep)
     if not cache_check_tokenizer(modelsize, modelstep):
         tokenizer = AutoTokenizer.from_pretrained(
             "EleutherAI/%s" % modelsize,
             revision=modelstep,
-            padding_side=padding_side, truncation_side=truncation_side, model_max_length=model_max_length
-        )
+            padding_side=padding_side,
+            truncation_side=truncation_side,
+            model_max_length=model_max_length)
         tokenizer.save_pretrained(modelloc)
 
-    model = vllm.LLM(model = f"EleutherAI/{modelsize}", revision = modelstep,
-                     tokenizer= modelloc, download_dir= modelloc, trust_remote_code = True,
+    if gpu_memory_utilization != 0.9:
+        model = vllm.LLM(model=f"EleutherAI/{modelsize}",
+                         revision=modelstep,
+                         tokenizer=modelloc,
+                         download_dir=modelloc,
+                         trust_remote_code=True,
+                         gpu_memory_utilization=gpu_memory_utilization,
+                         tensor_parallel_size=numgpus)
+        return model
+
+    model = vllm.LLM(model=f"EleutherAI/{modelsize}",
+                     revision=modelstep,
+                     tokenizer=modelloc,
+                     download_dir=modelloc,
+                     trust_remote_code=True,
                      tensor_parallel_size=numgpus)
 
     return model
 
+def load_opt_6b():
+    model_name = 'facebook/opt-6.7b'
+    model = vllm.LLM(
+        model = model_name,
+        trust_remote_code=True,
+        tensor_parallel_size = 1
+    )
+    return model
+
+
+def load_opt_2b():
+    model_name = 'facebook/opt-2.7b'
+    model = vllm.LLM(model=model_name,
+                     trust_remote_code=True,
+                     tensor_parallel_size=1)
+    return model
+
+
+def load_gpt_large():
+    model_name = 'openai-community/gpt2-large'
+    model = vllm.LLM(model=model_name,
+                     trust_remote_code=True,
+                     tensor_parallel_size=1)
+    return model
+
+def load_gpt_xl():
+    model_name = 'openai-community/gpt2-xl'
+    model = vllm.LLM(model=model_name,
+                     trust_remote_code=True,
+                     tensor_parallel_size=1)
+    return model
 
 def load_gemma_2():
+
     model_name = 'google/gemma-2b'
     gemma = vllm.LLM(model=model_name,
-                     trust_remote_code=True,
-                     max_model_len=2048,
-                     tensor_parallel_size=1)
+                        trust_remote_code=True,
+                        max_model_len=2048,
+                        tensor_parallel_size=1)
     return gemma
 
 
@@ -78,9 +133,27 @@ def load_gemma_7():
     gemma = vllm.LLM(model=model_name,
                         trust_remote_code=True,
                         max_model_len=2048,
-                        tensor_parallel_size=1)
+                        tensor_parallel_size=1, prompt_logprobs=1)
     return gemma
 
+
+def load_olmo(modelstep):
+    model_name = 'allenai/OLMo-7B'
+
+    out = list_repo_refs("allenai/OLMo-7B")
+    branches = [b.name for b in out.branches]
+
+    for branch in branches:
+        if modelstep in branch:
+            modelstep = branch
+            break
+
+    olmo = vllm.LLM(model=model_name,
+                    trust_remote_code=True,
+                    max_model_len=2048,
+                    revision=modelstep,
+                    tensor_parallel_size=1)
+    return olmo
 
 
 def load_llama_together():
