@@ -139,6 +139,7 @@ def load_gemma_7():
 
 def load_olmo(modelstep):
     model_name = 'allenai/OLMo-7B'
+    model_name = 'allenai/OLMo-7B-0724-hf'
 
     out = list_repo_refs("allenai/OLMo-7B")
     branches = [b.name for b in out.branches]
