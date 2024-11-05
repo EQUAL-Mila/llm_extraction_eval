@@ -100,6 +100,9 @@ python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype corner
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype cornerdel
 
+
+
+
 ## SLURM Usage
 For ease of replication of our experiments with model size, model checkpoints and varying prompt lenghts, we write custom scripts that you can schedule on your respective slurm server(s).
 One can modify the following scripts to match their local-environment configurations.

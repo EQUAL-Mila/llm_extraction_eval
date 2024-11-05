@@ -57,6 +57,23 @@ def load_pythia_model(modelsize,
                       gpu_memory_utilization=0.9,
                       numgpus=1):
 
+    """
+    Loads the Pythia model and tokenizer with specified configuration.
+
+    Args:
+        modelsize (str): Model size identifier.
+        modelstep (str): Model step/revision identifier.
+        device (str): Device to load the model on.
+        padding_side (str): Padding side for tokenizer.
+        truncation_side (str): Truncation side for tokenizer.
+        model_max_length (int): Maximum length for the model.
+        gpu_memory_utilization (float): GPU memory utilization limit.
+        numgpus (int): Number of GPUs to use.
+
+    Returns:
+        vllm.LLM: Loaded model instance.
+    """
+
     modelloc = path_to_scratch + "/%s/%s/" % (modelsize, modelstep)
     if not cache_check_tokenizer(modelsize, modelstep):
         tokenizer = AutoTokenizer.from_pretrained(
@@ -87,6 +104,13 @@ def load_pythia_model(modelsize,
     return model
 
 def load_opt_6b():
+    """
+    Loads the OPT 6.7B model.
+
+    Returns:
+        vllm.LLM: Loaded OPT 6.7B model instance.
+    """
+
     model_name = 'facebook/opt-6.7b'
     model = vllm.LLM(
         model = model_name,
@@ -97,6 +121,12 @@ def load_opt_6b():
 
 
 def load_opt_2b():
+    """
+    Loads the OPT 2.7B model.
+
+    Returns:
+        vllm.LLM: Loaded OPT 2.7B model instance.
+    """
     model_name = 'facebook/opt-2.7b'
     model = vllm.LLM(model=model_name,
                      trust_remote_code=True,
@@ -105,6 +135,9 @@ def load_opt_2b():
 
 
 def load_gpt_large():
+    """
+    Loads the GPT-2 Large model.
+    """
     model_name = 'openai-community/gpt2-large'
     model = vllm.LLM(model=model_name,
                      trust_remote_code=True,
@@ -112,6 +145,9 @@ def load_gpt_large():
     return model
 
 def load_gpt_xl():
+    """
+    Loads the GPT-2 XL model.
+    """
     model_name = 'openai-community/gpt2-xl'
     model = vllm.LLM(model=model_name,
                      trust_remote_code=True,
@@ -119,7 +155,9 @@ def load_gpt_xl():
     return model
 
 def load_gemma_2():
-
+    """
+    Loads the GEMMA 2B model.
+    """
     model_name = 'google/gemma-2b'
     gemma = vllm.LLM(model=model_name,
                         trust_remote_code=True,
@@ -129,6 +167,9 @@ def load_gemma_2():
 
 
 def load_gemma_7():
+    """
+    Loads the GEMMA 7B model.
+    """
     model_name = 'google/gemma-7b'
     gemma = vllm.LLM(model=model_name,
                         trust_remote_code=True,
@@ -138,6 +179,9 @@ def load_gemma_7():
 
 
 def load_olmo(modelstep):
+    """
+    Loads the OLMo 7B model.
+    """
     model_name = 'allenai/OLMo-7B'
     model_name = 'allenai/OLMo-7B-0724-hf'
 
@@ -158,12 +202,18 @@ def load_olmo(modelstep):
 
 
 def load_llama_together():
+    """
+    Loads the LLaMA 2.7B model by Together Computer.
+    """
     model_name = "togethercomputer/LLaMA-2-7B-32K"
     llama = vllm.LLM(model=model_name,
                      trust_remote_code=True, max_model_len=2048, tensor_parallel_size=1)
     return llama
 
 def load_mpt_7b():
+    """
+    Loads the MPT 7B model.
+    """
     model_name = "mosaicml/mpt-7b"
     mpt = vllm.LLM(model=model_name,
                      trust_remote_code=True,max_model_len=2048, tensor_parallel_size=1)
@@ -171,23 +221,35 @@ def load_mpt_7b():
 
 
 def load_phi():
+    """
+    Loads the PHI 2B model.
+    """
     model_name = "microsoft/phi-2"
     phi = vllm.LLM(model=model_name, trust_remote_code=True, max_model_len=2048, tensor_parallel_size=1)
     return phi
 
 
 def load_gpt2():
+    """
+    Loads the community GPT-2 model.
+    """
     model_name = "openai-community/gpt2"
     gpt2 = vllm.LLM(model=model_name, trust_remote_code=True, tensor_parallel_size=1)
     return gpt2
 
 def load_redpajama_chat():
+    """
+    Loads the RedPajama INCITE 7B Chat model.
+    """
     model_name = "togethercomputer/RedPajama-INCITE-7B-Chat"
     redpajama = vllm.LLM(model=model_name, trust_remote_code=True, tensor_parallel_size=1)
     return redpajama
 
 
 def load_redpajama_base():
+    """
+    Loads the RedPajama INCITE 7B Base model.
+    """
     model_name = "togethercomputer/RedPajama-INCITE-7B-Base"
     redpajama = vllm.LLM(model=model_name,
                          trust_remote_code=True,
@@ -196,6 +258,9 @@ def load_redpajama_base():
 
 
 def load_falcon():
+    """
+    Loads the Falcon 7B model.
+    """
     model_name = "tiiuae/falcon-7b"
     falcon = vllm.LLM(model=model_name,
                       trust_remote_code=True,
