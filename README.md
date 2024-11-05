@@ -1,7 +1,10 @@
 
 # Towards Realistic Extraction Attacks
 
-<insert abstract?>
+This repository hosts the code used for the paper: [Towards Realistic Extraction Attacks](https://arxiv.org/pdf/2407.02596)
+
+**Paper Preview:**  
+We revisit extraction attacks from an adversarial perspective, focusing on how to leverage the brittleness of language models and the multi-faceted access to the underlying data. We find significant churn in extraction trends, i.e., even unintuitive changes to the prompt, or targeting smaller models and earlier checkpoints, can extract distinct information. By combining information from multiple attacks, our adversary is able to increase the extraction risks by up to 2 times. Furthermore, even with mitigation strategies like data deduplication, we find the same escalation of extraction risks against a real-world adversary. 
 
 ## Repository Structure
 
@@ -64,14 +67,14 @@ An index file allows you index the downloaded data in a particular way. As per t
 ### Olmo
 
 **Configuration**
-Please follow the instructions at the [https://github.com/allenai/OLMo](original repo).  
+Please follow the instructions at the [original_repo](https://github.com/allenai/OLMo).  
 
 ```
 cd OLMo
 pip install -e .[all]
 ```
 To download the dataset(cache it) used for olmo, you can also use the `download_olmodata.py`. This file also updates the `config_local.yaml` required to load specific indexes of the training dataset. Edit `config_local.yaml` to customize parameters such as paths, model settings, and other experiment configurations.
-To use the default configs, refer to this [https://github.com/allenai/OLMo/blob/main/configs/official/OLMo-7B.yaml](link)
+To use the default configs, refer to this [link](https://github.com/allenai/OLMo/blob/main/configs/official/OLMo-7B.yaml).
 
 **Using index file**
 Filtered indices used for olmo are stored in `finalidx300000_olmo_filtered.csv`. Steps to filter are outlined in the paper.
@@ -136,7 +139,7 @@ One can modify the following scripts to match their local-environment configurat
 If you want to contribute, feel free to create a pull request or reach out to the maintainers.
 
 ## Contact
-For questions related to the repository, please contact @prakhar at prakhargannu@gmail.com, or @sert121 at yash.more@alumni.ashoka.edu.in
+For questions related to the repository, please contact @prakhar at [prakhargannu@gmail.com](mailto:prakhargannu@gmail.com), or @sert121 at [yash.more@alumni.ashoka.edu.in](mailto:yash.more@alumni.ashoka.edu.in)
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
