@@ -25,13 +25,30 @@ import time
 from transformers import logging
 from transformers import AutoTokenizer
 logging.set_verbosity_error()
-path_to_scratch = "/network/scratch/p/prakhar.ganesh/"
+path_to_scratch = "<add path to base_dir here>"
 
 
 def single_eval_run(args):
 
+    """
+    Runs a single evaluation pass using the specified model and dataset.
+
+    This function loads the appropriate model and dataset based on provided arguments,
+    generates text completions for prompts, and stores the output in a specified directory.
+    The results are also logged to Weights & Biases (wandb) [optional].
+
+    Args:
+        args (Namespace): Parsed arguments containing the configuration for the evaluation run, 
+                          including model type, dataset path, prompt length, etc.
+
+    Side Effects:
+        - Logs progress and outputs to Weights & Biases.
+        - Saves generated completion results to a file.
+    """
     start = time.time()
     device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    # Load model based on args.modelsize
     print("...1. loading model")
     if 'pythia' in args.modelsize:
         model = load_pythia_model(args.modelsize,
@@ -74,6 +91,8 @@ def single_eval_run(args):
 
     print("\n...2. loading prompt dataset")
     start = time.time()
+
+    # Define path for dataset based on model type
     if 'deduped' in args.modelsize:
         pilepath = path_to_scratch + "/pile-pythia/pile-deduped/document"
     else:
@@ -84,6 +103,7 @@ def single_eval_run(args):
     dataset_type = 'pythia'
     dataset_type = 'olmo' if 'olmo' in args.modelsize else dataset_type
     
+    # Initialize the prompt dataset
     prompt_dataset = ExtractionPromptDataset(
         pilepath=pilepath,
         evalfile=args.evalfile,
@@ -112,10 +132,12 @@ def single_eval_run(args):
     print("\n...3. generating completions")
     start = time.time()
 
+    # Generate completions for each sample in the dataset
     for sample in tqdm(prompt_loader):
         prompt_ids, completion_ids = sample['prompt'].detach().cpu().tolist(
         ), sample['completion'].detach().cpu().tolist()
 
+        # Generate text completions based on model type
         if "pythia" in args.modelsize or "olmo" in args.modelsize:
             outgen = model.generate_text(prompt_token_ids=prompt_ids)
             outgen_ids = [ele.outputs[0].token_ids for ele in outgen]
@@ -137,6 +159,8 @@ def single_eval_run(args):
 
     end = time.time()
     print(f"Time taken to generate completions: {end-start}")
+    # Save generated completions to a file
+
     with open(
             path_to_scratch + '/extraction_results/' + get_filename(
                 args, args_ignore=['scoring', 'batchsize', 'numgpus']),
@@ -148,8 +172,8 @@ def single_eval_run(args):
 if __name__=="__main__":
     parser = setup_parser()
     args = parser.parse_args()
-    ## NOTE: Wandb Setup
-    wandb.login(key='177301ceceab56316ac99630a79d09a45b1da3d6')
+    ## NOTE: Wandb Setup: Please replace 'your_wandb_key' with your own wandb key
+    wandb.login(key='your_wandb_key')
     wandb.init(
         project='llm-extraction-eval',
         name=f"run_{args.modelsize}_{args.modelstep}_{args.promptlen}_{random.randint(0, 1000000)}",
