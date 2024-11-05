@@ -64,8 +64,8 @@ An index file allows you index the downloaded data in a particular way. As per t
 ### Olmo
 
 **Configuration**
-Please follow the instructions at the (original repo)[https://github.com/allenai/OLMo]
-```git clone https://github.com/allenai/OLMo.git
+Please follow the instructions at the (https://github.com/allenai/OLMo)[original repo]
+```
 cd OLMo
 pip install -e .[all]
 ```
@@ -79,7 +79,7 @@ Filtered indices used for olmo are stored in `finalidx300000_olmo_filtered.csv`.
 To run an experiment, you can run the following code:
 
 
-**Changing prompt length**
+**Changing prompt length**  
 The `promptlen` flag specifies the input prompt length you want the model to test on.   
 ```
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 10
@@ -87,14 +87,14 @@ python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 30
 ```
 
-**Changing completion length**
+**Changing completion length**  
 The `complen` flag specifies the completion length (for the model), and the `maxtokens` is the max number of tokens you request from the model completion.  
 
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 10 --maxtokens 10
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 20 --maxtokens 20
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 30 --maxtokens 30
-**Changing Prompt type**
 
+**Changing Prompt type**  
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype skipalt
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype end
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype corner
