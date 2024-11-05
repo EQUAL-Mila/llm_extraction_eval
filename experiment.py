@@ -125,9 +125,7 @@ def single_eval_run(args):
             outgen = model.generate_text(prompts=prompts)
             outgen = [str(ele.outputs[0].text) for ele in outgen]
             outgen_ids = tokenizer(outgen)
-            # for ele in outgen:
-            #     print(ele)
-            #     outgen_ids = tokenizer.encode(ele)
+
 
         gen_arr.append({
             'prompt_ids': prompt_ids,
