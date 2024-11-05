@@ -170,6 +170,14 @@ def single_eval_run(args):
 
 
 if __name__=="__main__":
+    """
+    Main entry point for the script. Sets up arguments and initializes Weights & Biases (wandb) for logging.
+
+    Steps:
+        - Parses command-line arguments.
+        - Logs into wandb and initializes a new run.
+        - Executes the single evaluation run (`single_eval_run`) with the specified arguments.
+    """
     parser = setup_parser()
     args = parser.parse_args()
     ## NOTE: Wandb Setup: Please replace 'your_wandb_key' with your own wandb key
