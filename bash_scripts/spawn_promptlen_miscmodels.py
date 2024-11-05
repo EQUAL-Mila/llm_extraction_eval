@@ -1,14 +1,24 @@
+"""
+This script is used to generate the sbatch files for the experiments involving looking at the effects of prompt length for miscellaneous models.
+The script generates the sbatch files to run experiments for the following dimensions:
+- Prompt length + Model size  (different combinations of each)
+"""
+
+import argparse
+parser = argparse.ArgumentParser(description='Run the evaluation script')
+parser.add_argument('--basefolder', type=str, default='./', help='Base folder for the scripts')
+parser.add_argument('--conda_env', type=str, default='vllm', help='Conda environment to use')
+parser.add_argument('--runner', type=str, default='person1', help='Name of the person running the script')
+
+args = parser.parse_args()
+
 prompt_lengths = [ 100, 200, 300, 400, 500]
 model_steps = ['step100000','step105000','step110000', 'step115000','step120000','step125000','step130000','step135000','step140000']
 model_sizes = ['gemma2', 'gemma7','llama', 'olmo','phi','mpt','gpt2','redpajama','falcon']
 
-runner = 'yash'
+runner = args.runner
+base_folder = args.basefolder
 
-if runner is 'prakhar':
-    base_folder = "./"
-
-elif runner is 'yash':
-    base_folder = "./"
 
 # --------------------------------------------------------
 # Making the sbatch file for the experiments prompt lengths
@@ -44,7 +54,7 @@ for prompt_len in prompt_lengths:
 #SBATCH --mail-user=prakhar.ganesh@mila.quebec
 
 module load miniconda/3
-conda activate vllm
+conda activate {args.conda_env}
 python experiment.py --evalfile finalidx100000.csv --complen 500 --maxtokens 500 --promptlen {prompt_len} --modelsize {model_size}
 echo "Done!"
 """
@@ -61,7 +71,7 @@ echo "Done!"
 #SBATCH --mail-user=prakhar.ganesh@mila.quebec
 
 module load miniconda/3
-conda activate vllm
+conda activate {args.conda_env}
 python experiment.py --evalfile finalidx100000.csv --complen 500 --maxtokens 500 --promptlen {prompt_len} --modelsize {model_size}
 echo "Done!"
 """

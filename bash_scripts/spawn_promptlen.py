@@ -1,3 +1,12 @@
+"""
+This script is used to generate the sbatch files for the experiments involving looking at the effects of prompt length, model step and model size on the performance of the model.
+The script generates the sbatch files to run experiments for the following dimensions:
+- Prompt length
+- Model step (checkpoint)
+- Model size
+(individual axis)
+"""
+
 import argparse
 parser = argparse.ArgumentParser(description='Run the evaluation script')
 parser.add_argument('--basefolder', type=str, default='./', help='Base folder for the scripts')

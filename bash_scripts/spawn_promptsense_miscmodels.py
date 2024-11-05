@@ -1,7 +1,17 @@
 """
-This script runs the experiments for prompt sensitivity i.e mask token and reduce token for different prompt lengths and window sizes.
+This script runs the experiments for prompt sensitivity.
+It generates the sbatch files for the experiments varying on the following dimensions:
+- Prompt length + Window size + Prompt type + Model type (except for pythia and olmo models)
+(combinations of each type)
 """
 
+import argparse
+parser = argparse.ArgumentParser(description='Run the evaluation script')
+parser.add_argument('--basefolder', type=str, default='./', help='Base folder for the scripts')
+parser.add_argument('--conda_env', type=str, default='vllm', help='Conda environment to use')
+parser.add_argument('--runner', type=str, default='person1', help='Name of the person running the script')
+
+args = parser.parse_args()
 
 
 prompt_lengths = [100,300,500]
@@ -9,12 +19,9 @@ window_sizes = [5,10,15,20]
 prompt_types = ['reduce', 'masktoken']
 model_sizes = ['gemma2', 'gemma7', 'phi','mpt','gpt2','redpajama','falcon']
 
-runner = 'yash'
-if runner is 'prakhar':
-    base_folder = "/network/scratch/p/prakhar.ganesh/"
+runner = args.runner
+base_folder = args.basefolder
 
-elif runner is 'yash':
-    base_folder = "./"
 
 # --------------------------------------------------------
 # Making the sbatch file for the experiments prompt lengths
@@ -38,11 +45,9 @@ for model_size in model_sizes:
 #SBATCH --time={time}
 #SBATCH --mem=48000M
 #SBATCH --gres=gpu:1
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=prakhar.ganesh@mila.quebec
 
 module load miniconda/3
-conda activate vllm
+conda activate {args.conda_env}
 python experiment.py --evalfile finalidx100000.csv --complen 500 --maxtokens 500 --promptlen {prompt_len} --window {window_size} --prompttype {prompt_type} --modelsize {model_size}
 echo "Done!"
 """
@@ -55,11 +60,9 @@ echo "Done!"
 #SBATCH --time={time}
 #SBATCH --mem=48000M
 #SBATCH --gres=gpu:a100l:1
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=prakhar.ganesh@mila.quebec
 
 module load miniconda/3
-conda activate vllm
+conda activate {args.conda_env}
 python experiment.py --evalfile finalidx100000.csv --complen 500 --maxtokens 500 --promptlen {prompt_len} --window {window_size} --prompttype {prompt_type} --modelsize {model_size}
 echo "Done!"
 """

@@ -1,13 +1,25 @@
+"""
+This script is used to generate the sbatch files for the prompt sensitivity experiments.
+More specifically, it generates the sbatch files varying on the following dimensions:
+- Prompt length + Window size + Prompt type (combinations of each)
+"""
+
+import argparse
+parser = argparse.ArgumentParser(description='Run the evaluation script')
+parser.add_argument('--basefolder', type=str, default='./', help='Base folder for the scripts')
+parser.add_argument('--conda_env', type=str, default='vllm', help='Conda environment to use')
+parser.add_argument('--runner', type=str, default='someperson', help='Name of the person running the script')
+
+args = parser.parse_args()
+
 prompt_lengths = [100,300,500]
 window_sizes = [5,10,15,20]
 prompt_types = ['reduce', 'masktoken']
 
-runner = 'yash'
-if runner is 'prakhar':
-    base_folder = "/network/scratch/p/prakhar.ganesh/"
 
-elif runner is 'yash':
-    base_folder = "./"
+base_folder = args.basefolder
+runner = args.runner
+
 
 # --------------------------------------------------------
 # Making the sbatch file for the experiments prompt lengths
@@ -29,8 +41,6 @@ for prompt_len in prompt_lengths:
 #SBATCH --time={time}
 #SBATCH --mem=48000M
 #SBATCH --gres=gpu:1
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=prakhar.ganesh@mila.quebec
 
 module load miniconda/3
 conda activate vllm
