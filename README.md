@@ -1,7 +1,7 @@
 
 # Towards Realistic Extraction Attacks
 
-<insert repo structure/understanding>
+<insert abstract?>
 
 ## Repository Structure
 
@@ -33,7 +33,7 @@
 
    ```bash
    git clone https://github.com/prakhargannu/llm_extraction_eval.git
-   cd your_project
+   cd llm_extraction_eval
    ```
 
 2. Install required dependencies:
@@ -65,45 +65,53 @@ An index file allows you index the downloaded data in a particular way. As per t
   
 ### Olmo
 
-**Downloading the Olmo Dataset**
+**Configuration**
+Please follow the instructions at the (original repo)[https://github.com/allenai/OLMo]
+```git clone https://github.com/allenai/OLMo.git
+cd OLMo
+pip install -e .[all]
+```
+To download the dataset(cache it) used for olmo, you can also use the `download_olmodata.py`. This file also updates the `config_local.yaml` required to load specific indexes of the training dataset. Edit `config_local.yaml` to customize parameters such as paths, model settings, and other experiment configurations.
+To use the default configs, refer to this (link)[https://github.com/allenai/OLMo/blob/main/configs/official/OLMo-7B.yaml].
+
+**Using index file**
+Filtered indices used for olmo are stored in `finalidx300000_olmo_filtered.csv`. Steps to filter are outlined in the paper.
+
+## Usage
+To run an experiment, you can run the following code:
 
 
+**Changing prompt length**
+The `promptlen` flag specifies the input prompt length you want the model to test on.   
+```
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 10
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 20
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 30
+```
 
-## Configuration
+**Changing completion length**
+The `complen` flag specifies the completion length (for the model), and the `maxtokens` is the max number of tokens you request from the model completion.  
 
-Edit `config_local.yaml` to customize parameters such as paths, model settings, and other experiment configurations.
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 10 --maxtokens 10
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 20 --maxtokens 20
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 30 --maxtokens 30
+**Changing Prompt type**
 
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype skipalt
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype end
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype corner
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype cornerdel
 
+## SLURM Usage
+For ease of replication of our experiments with model size, model checkpoints and varying prompt lenghts, we write custom scripts that you can schedule on your respective slurm server(s).
+One can modify the following scripts to match their local-environment configurations.
 
-  - To fetch the dolma dataset, you can use `download_
-- **Running Experiments**: Execute `experiment.py` to start the main experiment.
-- **Evaluation**: Use `generate_eval_file.py` and `score.py` to evaluate models or outputs.
 
 ## Contributing
-
 If you want to contribute, feel free to create a pull request or reach out to the maintainers.
-
 
 ## Contact
 For questions related to the repository, please contact @prakhar at prakhargannu@gmail.com, or @sert121 at yash.more@alumni.ashoka.edu.in
 
 ## License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-- [x] Keep increasing prompt length and see how the results change. Does it keep on increasing always? Does it plateau? Does it maybe even decrease for some prompts? (Code note: Simply change the values of the flag `promptlen` and see how things change)
-- [x] Skip every alternate token in the prompt and see how extraction rates change. The extraction rate should still be some reasonably high value, to show that it's the context we care about, not the exact order of tokens. (Code note: Simply change the flag `prompttype` to `skipalt` to skip alternate tokens in the prompt)
-- [x] Keep the last few tokens as is, but randomly shuffle all tokens at the start. Same expectation as above. (Code note: Simply change the flag `prompttype` to `end50` to shuffle the initial tokens in the prompt, while keeping the last 50 tokens fixed)
-- [x] Keep the last few and the first few tokens as is, but randomly shuffle all tokens in the middle, or even remove them. Same expectation as above. (Code note: Simply change the flag `prompttype` to `corner50` to shuffle the middle tokens in the prompt, while keeping the last and first 50 tokens each fixed. Change the flag to `corner50del` for the same but middle tokens are deleted instead of being shuffled)
-
-- [x] Introduce instructions into the prompt to further elicit information out of the model. Are there instructions that can help with data extraction? (Code note: Each instruction set has its own identifier. Use the flag `instructions` and the identifier as input to add those instructions to the prompt. Check function `get_instruction_ids` in file `utils.py` to see those instruction identifiers, or add new instructions)
-
-- [x] Increase beam length and max tokens to see if the generation changes. (Code note: Simply set the flags `beamwidth` and `maxtokens` to change the relevant parameters)
-
-- [x] Perform extraction attacks over different time steps. (Code note: Simple change the flag `modelstep` to `stepxxxxxx`, where `xxxxxx` can be anything between 100000 to 140000, at steps of 1000 only)
-
-- [x] Changing scoring from perfect match at a fixed length to the length of perfect match. Observe the distribution. (Code note: Use the `scoring` flag `length` to check the length of exact match)
-- [ ] Incorporate levenshtein distance or other measures to study insertions, deletions or substitutions. (Code note: Use the `scoring` flag `levenshtein` to check the levenshtein distance between generated text and original completion)
-- [ ] Study semantic similarity instead of token level matching, by using cosine similarity. (Code note: TODO. This is not implemented yet)
-- [ ] Print out original sentences, given indices, to qualitatively analyse the results. (Code note: TODO. This is not implemented yet)
-
