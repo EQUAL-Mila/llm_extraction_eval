@@ -122,10 +122,15 @@ You can find example scripts in the `bash_scripts` folder.
 
 
 `bash_scripts/spawn_olmo_prompt_len.py` : creates bash scripts to run experiment.py while varying prompt length (for olmo models)  
+
 `bash_scripts/spawn_promptlen_miscmodels.py`:  creates bash scripts to run experiment.py while varying promptlength (for non-pythia and non-olmo models)  
+
 `bash_scripts/spawn_promptlen.py`:  creates bash scripts to run experiment.py while varying promptlength (for pythia models)  
+
 `bash_scripts/spawn_promptsense_miscmodels.py`:  creates bash scripts to run experiment.py while varying prompt structure for misc models.  
+
 `bash_scripts/spawn_promptsense.py`: creates bash scripts to run experiment.py while varying prompt structure for pythia models.  
+
 `bash_scripts/spawn_custom_multidim.py`: creates bash scripts to run experiment.py that run different combinations of promptlen, model sizes and checkpoints.   
 
 
