@@ -81,6 +81,7 @@ To run an experiment, you can run the following code:
 
 **Changing prompt length**  
 The `promptlen` flag specifies the input prompt length you want the model to test on.   
+
 ```
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 10
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 20
@@ -90,17 +91,39 @@ python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen
 **Changing completion length**  
 The `complen` flag specifies the completion length (for the model), and the `maxtokens` is the max number of tokens you request from the model completion.  
 
+```
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 10 --maxtokens 10
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 20 --maxtokens 20
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --complen 30 --maxtokens 30
-
+```
 **Changing Prompt type**  
+There are various prompt variations that can be accessed through the following tags:
+```
+skipalt : skip alternative character
+end: 
+corner:
+cornerdel
+```
+You can specify them using the `prompttype` argument.   
+```
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype skipalt
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype end
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype corner
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype cornerdel
+```
 
+**Changing Temperature**  
+```
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --temperature 0.1
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --temperature 0.2
+```
 
+**Changing Time Step/Revision**  
+```
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --modelstep step100000
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --modelstep step105000
+python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --modelstep step110000
+```
 
 
 ## SLURM Usage

@@ -38,12 +38,6 @@ python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype corner
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --promptlen 500 --prompttype cornerdel
 
-## Changing Instructions
-python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --instructions assistant
-python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --instructions short
-python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --instructions follows
-python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --instructions excerpt
-python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --instructions dan
 
 ## Changing Temperature
 python experiment.py --evalfile finalidx100000.csv --batchsize 10000 --temperature 0.1
