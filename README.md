@@ -64,13 +64,14 @@ An index file allows you index the downloaded data in a particular way. As per t
 ### Olmo
 
 **Configuration**
-Please follow the instructions at the (https://github.com/allenai/OLMo)[original repo]
+Please follow the instructions at the [https://github.com/allenai/OLMo](original repo).  
+
 ```
 cd OLMo
 pip install -e .[all]
 ```
 To download the dataset(cache it) used for olmo, you can also use the `download_olmodata.py`. This file also updates the `config_local.yaml` required to load specific indexes of the training dataset. Edit `config_local.yaml` to customize parameters such as paths, model settings, and other experiment configurations.
-To use the default configs, refer to this (https://github.com/allenai/OLMo/blob/main/configs/official/OLMo-7B.yaml)[link]
+To use the default configs, refer to this [https://github.com/allenai/OLMo/blob/main/configs/official/OLMo-7B.yaml](link)
 
 **Using index file**
 Filtered indices used for olmo are stored in `finalidx300000_olmo_filtered.csv`. Steps to filter are outlined in the paper.
