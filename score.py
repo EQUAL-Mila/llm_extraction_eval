@@ -21,6 +21,13 @@ path_to_scratch = "/network/scratch/p/prakhar.ganesh/"
 
 
 def print_single_statement(args, idx):
+    """
+    Prints a single prompt-completion pair from the generated data based on the provided index.
+
+    Args:
+        args: Parsed arguments containing configuration details.
+        idx: Index of the example to retrieve and print.
+    """
     print("using .. ")
     print(path_to_scratch + '/extraction_results/' +
           get_filename(args, args_ignore=['scoring', 'batchsize', 'numgpus']))
@@ -68,6 +75,13 @@ def print_single_statement(args, idx):
     print("--------------------")
 
 def single_eval_score(args):
+    """
+    Evaluates a single prompt-completion pair and calculates the prompt scoring.
+
+    Args:
+        args: Parsed arguments containing configuration details.
+    """
+
     with open(path_to_scratch + '/extraction_results/' + get_filename(args, args_ignore=['scoring', 'batchsize', 'numgpus']), "rb") as fp:
         gen_arr = pickle.load(fp)
 
@@ -110,6 +124,16 @@ def single_eval_score(args):
 
 
 def multiple_eval_single_axis(args, var_name, var_list, ld):
+    """
+    Performs multiple evaluations on a single variable axis and plots extraction rates.
+
+    Args:
+        args: Parsed arguments containing configuration details.
+        var_name: Name of the variable to vary in evaluations.
+        var_list: List of values for the specified variable.
+        ld: Levenshtein distance threshold.
+    """
+
     all_scores = []
     all_acc = []
     temp = path_to_scratch + '/extraction_results/' + get_filename(
@@ -157,6 +181,21 @@ def multiple_eval_single_axis(args, var_name, var_list, ld):
 
 def multiple_eval_multiple_axis(args, var1_name, var1_list, var2_name,
                                 var2_list, var3_name, var3_list, ld):
+
+    """
+    Evaluates multiple variable combinations on separate axes .
+
+    Args:
+        args: Parsed arguments containing configuration details.
+        var1_name: Name of the first variable.
+        var1_list: List of values for the first variable.
+        var2_name: Name of the second variable.
+        var2_list: List of values for the second variable.
+        var3_name: Name of the third variable.
+        var3_list: List of values for the third variable.
+        ld: Levenshtein distance threshold.
+    """
+
     all_scores = []
     all_acc = []
     for var1_val in tqdm(var1_list):
@@ -213,6 +252,13 @@ def multiple_eval_multiple_axis(args, var1_name, var1_list, var2_name,
     # print(combined_scores)
 
 def multiple_eval_combined(args):
+    """
+    Evaluates different variables and their respective values, for example : prompt length, model size, model step etc.
+    and reports a combined score across the chosen variables. To choose a variable, please uncommment respective keys.
+    Args:
+        args: Parsed arguments containing configuration details.
+    """
+
     args_change = {
                     # 'modelstep': ['step100000', 'step105000', 'step110000', 'step115000', 'step120000',
                     #               'step125000', 'step130000', 'step135000', 'step140000'],
@@ -280,6 +326,14 @@ def multiple_eval_combined(args):
 
 
 def zlib_eval(args):
+
+    """
+    Computes the ratio of perplexity to zlib-compression entropy for each completion.
+
+    Args:
+        args: Parsed arguments containing configuration details.
+    """
+    
     MODEL_USAGE = 'vllm'
 
     if MODEL_USAGE == 'hf':
