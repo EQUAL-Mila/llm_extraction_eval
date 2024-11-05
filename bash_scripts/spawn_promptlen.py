@@ -1,3 +1,12 @@
+import argparse
+parser = argparse.ArgumentParser(description='Run the evaluation script')
+parser.add_argument('--basefolder', type=str, default='./', help='Base folder for the scripts')
+parser.add_argument('--conda_env', type=str, default='vllm', help='Conda environment to use')
+parser.add_argument('--runner', type=str, default='person1', help='Name of the person running the script')
+
+args = parser.parse_args()
+
+
 prompt_lengths = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
 model_steps = ['step100000','step105000','step110000', 'step115000','step120000','step125000','step130000','step135000','step140000']
 model_sizes = [
@@ -5,15 +14,9 @@ model_sizes = [
 ]
 model_sizes_deduped = [ 'pythia-1b-deduped', 'pythia-1.4b-deduped', 'pythia-2.8b-deduped', 'pythia-6.9b-deduped', 'pythia-12b-deduped']
 
-
-runner = 'prakhar'
 deduped = False
-
-if runner is 'prakhar':
-    base_folder = "./"
-
-elif runner is 'yash':
-    base_folder = "./"
+runner = args.runner
+base_folder = args.basefolder
 
 if deduped:
     model_sizes = model_sizes_deduped
@@ -44,7 +47,8 @@ for prompt_len in prompt_lengths:
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=prakhar.ganesh@mila.quebec
 
-source activate pythia
+module load miniconda/3
+conda activate {args.conda_env}
 python experiment.py --evalfile finalidx100000.csv --complen 500 --maxtokens 500 --promptlen {prompt_len} --modelsize pythia-6.9b-deduped
 echo "Done!"
 """
@@ -75,7 +79,8 @@ for model_step in model_steps:
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=prakhar.ganesh@mila.quebec
 
-source activate pythia
+module load miniconda/3
+conda activate {args.conda_env}
 python experiment.py --evalfile finalidx100000.csv --complen 500 --maxtokens 500 --modelstep {model_step} --modelsize pythia-6.9b-deduped
 echo "Done!"
 """
@@ -115,7 +120,8 @@ for model_size in model_sizes:
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=prakhar.ganesh@mila.quebec
 
-source activate pythia
+module load miniconda/3
+conda activate {args.conda_env}
 python experiment.py --evalfile finalidx100000.csv --complen 500 --maxtokens 500 --modelsize {model_size} 
 echo "Done!"
 """
