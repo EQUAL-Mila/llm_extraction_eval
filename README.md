@@ -1,7 +1,7 @@
 
-# Towards Realistic Extraction Attacks
+# Towards More Realistic Extraction Attacks
 
-This repository hosts the code used for the paper: [Towards Realistic Extraction Attacks](https://arxiv.org/pdf/2407.02596)
+This repository hosts the code used for the paper: [Towards More Realistic Extraction Attacks: An Adversarial Perspective](https://arxiv.org/pdf/2407.02596)
 
 **Paper Preview:**  
 We revisit extraction attacks from an adversarial perspective, focusing on how to leverage the brittleness of language models and the multi-faceted access to the underlying data. We find significant churn in extraction trends, i.e., even unintuitive changes to the prompt, or targeting smaller models and earlier checkpoints, can extract distinct information. By combining information from multiple attacks, our adversary is able to increase the extraction risks by up to 2 times. Furthermore, even with mitigation strategies like data deduplication, we find the same escalation of extraction risks against a real-world adversary. 
@@ -49,7 +49,7 @@ We revisit extraction attacks from an adversarial perspective, focusing on how t
 **Downloading Pile Dataset**
 Follow the steps here to install the required packages and then download the dataset - https://github.com/EleutherAI/pythia?tab=readme-ov-file#exploring-the-dataset
 
-If the 'hf_hub_download' function doesn't work (as it didn't for me), you can use the alternative 'snapshot_download' (see the file in this repo - `download_dataset.py`; Make sure to change the path according to your cluster location)
+If the 'hf_hub_download' function doesn't work (as it didn't for us), you can use the alternative 'snapshot_download' (see the file in this repo - `download_dataset.py`; Make sure to change the path according to your cluster location)
 
 **Preparing the Pile Dataset**
 Continue following the steps in the above link to 'unshard' the dataset after downloading it. More specifically,
@@ -114,6 +114,14 @@ python experiment.py --evalfile finalidx100000.csv --modelstep step105000
 python experiment.py --evalfile finalidx100000.csv --modelstep step110000
 ```
 
+**Changing Model**  
+The `modelsize` flag specifies the input model (default is Pythia-6.9B).  
+
+```
+python experiment.py --evalfile finalidx100000.csv --modelsize pythia-1b
+python experiment.py --evalfile finalidx100000.csv --modelsize pythia-12b
+python experiment.py --evalfile finalidx100000.csv --modelsize olmo
+```
 
 ## SLURM Usage
 For ease of replication of our experiments with model size, model checkpoints and varying prompt lenghts, we write custom scripts that you can schedule on your respective slurm server(s).
@@ -143,7 +151,7 @@ One can modify the score.py file according to the metrics they want to evaluate:
 If you want to contribute, feel free to create a pull request or reach out to the maintainers.
 
 ## Contact
-For questions related to the repository, please contact @prakharg24 at [prakhar.ganesh@mila.quebec](mailto:prakhargannu@gmail.com), or @sert121 at [yash.more@alumni.ashoka.edu.in](mailto:yash.more@alumni.ashoka.edu.in)
+For questions related to the repository, please contact @prakharg24 at [prakhar.ganesh@mila.quebec](mailto:prakhar.ganesh@mila.quebec), or @sert121 at [yash.more@alumni.ashoka.edu.in](mailto:yash.more@alumni.ashoka.edu.in)
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
