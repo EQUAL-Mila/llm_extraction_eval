@@ -7,6 +7,8 @@ import zlib
 import evaluate
 import torch
 import vllm
+import bert_score
+from tqdm import tqdm
 
 def setup_parser():
     parser = argparse.ArgumentParser(description='Extraction Attack: Single Evaluation Run')
@@ -46,7 +48,30 @@ def get_filename(args, args_ignore=None):
 
     return filename[:-2] + '.log'
 
-def prompt_scoring(orig_ids, gen_ids, scoring='exact', levenshtein_delta=0.8):
+def rougel(X, Y): 
+    # find the length of the strings 
+    m = len(X) 
+    n = len(Y) 
+ 
+    # declaring the array for storing the dp values 
+    L = [[None]*(n + 1) for i in range(m + 1)] 
+ 
+    """Following steps build L[m + 1][n + 1] in bottom up fashion 
+    Note: L[i][j] contains length of LCS of X[0..i-1] 
+    and Y[0..j-1]"""
+    for i in range(m + 1): 
+        for j in range(n + 1): 
+            if i == 0 or j == 0 : 
+                L[i][j] = 0
+            elif X[i-1] == Y[j-1]: 
+                L[i][j] = L[i-1][j-1]+1
+            else: 
+                L[i][j] = max(L[i-1][j], L[i][j-1]) 
+ 
+    # L[m][n] contains the length of LCS of X[0..n-1] & Y[0..m-1] 
+    return L[m][n]/max(m, n)
+
+def prompt_scoring(orig_ids, gen_ids, scoring='exact', levenshtein_delta=0.8, return_raw=False):
     orig_ids, gen_ids = np.array(orig_ids), np.array(gen_ids)
     ## TODO: It records the perfect match for now, but we want to record how much matches later.
     if scoring=='exact':
@@ -62,7 +87,39 @@ def prompt_scoring(orig_ids, gen_ids, scoring='exact', levenshtein_delta=0.8):
         for origid, genid in zip(orig_ids, gen_ids):
             score = Levenshtein.ratio(origid, genid)
             outscores.append(score)
+        if return_raw==True:
+            return np.array(outscores)
         return np.array(outscores) >= levenshtein_delta
+    elif scoring=="hamming":
+        outscores = np.mean(orig_ids==gen_ids, axis=-1)
+        if return_raw==True:
+            return outscores
+        return outscores >= levenshtein_delta
+    elif scoring=="rougel":
+        outscores = []
+        for origid, genid in tqdm(zip(orig_ids, gen_ids)):
+            score = rougel(origid, genid)
+            outscores.append(score)
+        if return_raw==True:
+            return np.array(outscores)
+        return np.array(outscores) >= levenshtein_delta
+    elif scoring=="bertscore":
+        tokenizer = AutoTokenizer.from_pretrained(
+                "EleutherAI/pythia-6.9b",
+                padding_side='right',
+                truncation_side='right',
+                model_max_length=2048)
+        orig_sentences = tokenizer.batch_decode(
+            orig_ids
+        )
+        gen_sentences = tokenizer.batch_decode(
+            gen_ids
+        )
+        P, R, F1 = bert_score.score(orig_sentences, gen_sentences, lang="en", verbose=True)
+        outscores = F1.detach().cpu().numpy()
+        if return_raw==True:
+            return outscores
+        return outscores >= levenshtein_delta
     else:
         raise NotImplementedError("Evaluation scoring method %s is not implemented" % scoring)
 
