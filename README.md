@@ -40,7 +40,8 @@ We revisit extraction attacks from an adversarial perspective, focusing on how t
 2. Install required dependencies:
 
    ```bash
-   pip install -r requirements.txt
+   conda env create -f env.yml
+   conda activate env
    ```
 
 ## Dataset Download Instructions
