@@ -1,7 +1,7 @@
 
 # Towards More Realistic Extraction Attacks
 
-This repository hosts the code used for the paper: [Towards More Realistic Extraction Attacks: An Adversarial Perspective](https://arxiv.org/pdf/2407.02596)
+This repository hosts the code used for the paper: [Towards More Realistic Extraction Attacks: An Adversarial Perspective](https://arxiv.org/abs/2407.02596)
 
 **Paper Preview:**  
 We revisit extraction attacks from an adversarial perspective, focusing on how to leverage the brittleness of language models and the multi-faceted access to the underlying data. We find significant churn in extraction trends, i.e., even unintuitive changes to the prompt, or targeting smaller models and earlier checkpoints, can extract distinct information. By combining information from multiple attacks, our adversary is able to increase the extraction risks by up to 2 times. Furthermore, even with mitigation strategies like data deduplication, we find the same escalation of extraction risks against a real-world adversary. 
@@ -33,7 +33,7 @@ We revisit extraction attacks from an adversarial perspective, focusing on how t
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/prakharg24/llm_extraction_eval.git
+   git clone https://github.com/EQUAL-Mila/llm_extraction_eval.git
    cd llm_extraction_eval
    ```
 
